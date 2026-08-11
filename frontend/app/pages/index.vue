@@ -15,7 +15,6 @@ const ticketAccepted = computed(() => state.value.status === 'accepted')
     <header class="masthead">
       <p class="eyebrow">LUNCH DECISION UNIT · LM—01</p>
       <h1>점심 결정 기계</h1>
-      <p class="masthead-copy">고민은 기계 안에 넣어 두었습니다. 한 번만 당겨 보세요.</p>
     </header>
 
     <section class="machine-stage" aria-labelledby="machine-title">
@@ -96,13 +95,7 @@ const ticketAccepted = computed(() => state.value.status === 'accepted')
           <span class="lever-handle" aria-hidden="true" />
           <span class="lever-stem" aria-hidden="true" />
           <span class="lever-base" aria-hidden="true" />
-          <span class="lever-copy">{{ isBusy ? '작동 중' : '당기기' }}</span>
         </button>
-
-        <div class="machine-instruction">
-          <span>01</span>
-          <p>레버를 한 번 당기면<br>오늘의 메뉴가 나옵니다.</p>
-        </div>
       </div>
     </section>
 
