@@ -2,7 +2,7 @@
 
 ## Result
 
-State: **PASS** for local SQLite. The 1,000-menu Vercel + Neon promotion is pending.
+State: **PASS** for local SQLite and live Vercel + Neon production.
 
 ## Automated checks
 
@@ -50,24 +50,25 @@ State: **PASS** for local SQLite. The 1,000-menu Vercel + Neon promotion is pend
 - [x] Production configuration rejects the local secret and non-persistent Vercel SQLite configuration.
 - [x] GitHub Actions reproduces the backend and frontend quality gates without secrets.
 - [x] Neon Production migrations completed for content types, users, tokens, and recommendations.
-- [x] Prior production seed verified at 342 active foods before the current catalog expansion.
-- [x] Production catalog quality update completed with `342 updated`; follow-up audit returned 342 distinct descriptions, 294 distinct attribute profiles, zero blanks, and 47 explicitly cold dishes.
+- [x] Production seed verified at exactly 1,000 active foods; the idempotent follow-up reported `0 created, 0 updated, 1000 unchanged, 0 deactivated`.
+- [x] Production `audit_foods` returned 1,000 unique descriptions, 71 families, 918 distinct profiles, 115 cold dishes, and 233 spicy dishes.
 - [x] Production 바쿠테 now mentions pork ribs and reports `broth=0.9`, `light=0.4`, `adventurous=0.7`, `cold=0.0`, and `familiar=0.4`.
 - [x] Live cold-start recommendation returned the honest no-history reason and an item-specific description; its temporary session and exposure were removed afterward.
-- [x] Production migration `0004_food_staple_types` completed and the idempotent seed updated all 342 Neon rows.
-- [x] Production staple audit returned exactly 172 rice, 41 bread, and 79 noodle memberships across 342 active menus.
-- [x] Live combined filter returned `탄탄멘` under hot + noodle + Japanese + spicy with `rules-v3`; database audit confirmed `cold=0.0`, `spicy=0.6`, and a one-item matching candidate set.
+- [x] Production schema remains at migration `0004_food_staple_types`; no schema migration was required for the catalog-only expansion.
+- [x] Production staple audit returned exactly 531 rice, 122 bread, and 196 noodle memberships across 1,000 active menus.
+- [x] Live complete-filter smoke tests covered all six broad cuisine groups plus a same-group OR/cross-group AND case; every match returned `rules-v3` and a correctly classified staple.
 - [x] Live impossible filter returned HTTP 400 with `no_matching_foods`; the deployed web returned HTTP 200 with the new `조건 고르기` trigger.
-- [x] Temporary production filter session and exposure were deleted and follow-up smoke-record counts were zero.
+- [x] Seven temporary production filter sessions and exposures were deleted; follow-up session, exposure, and event counts were all zero.
 - [x] GitHub Actions run `31474772129` passed for commit `f172381`.
 - [x] Vercel Django API health returned HTTP 200 at `https://lunch-api-mocha.vercel.app/api/v1/health`.
 - [x] Production signup page returned HTTP 200 and CORS returned the exact web origin.
 - [x] Disposable production account completed register, current-user lookup, recommendation, `ACCEPTED` feedback, logout (HTTP 204), and login again.
 - [x] Disposable user, token, recommendation session, exposure, and feedback were removed; follow-up counts were zero.
+- [x] GitHub Actions run `31477492178` passed for commit `37f4adf` after the final seed optimization.
+- [x] Vercel production deployment `dpl_23NshkXgdvR2PezN4oFjZpyaotuP` reached Ready and the API health endpoint returned HTTP 200.
 
 ## Not yet verified
 
-- [ ] Promote and audit the 1,000-menu catalog in Neon production, deploy the compatible API code, and run live filter smoke checks.
 - [ ] Live PostgreSQL migration/test path: Docker Desktop's Linux engine was not running.
 - [ ] Manual browser visual and keyboard pass: local servers launched and API smoke passed, but the available browser-control runtime reported no browser backend; UI evidence remains build-, type-, and unit-test-based.
 - [ ] Cross-browser and mobile-device behavior.

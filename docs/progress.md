@@ -51,6 +51,10 @@ The application is live on Vercel with a Neon free PostgreSQL database. The full
 - Confirmed 41 meaningful full combinations return candidates and 31 semantically empty combinations follow the explicit no-match path.
 - Verified idempotent local seeding with `0 created, 0 updated, 1000 unchanged, 0 deactivated` on the second run.
 - Switched the seed command to batched create/update operations after the first remote run exposed per-row network round trips at the new scale.
+- Deployed the compatible API mapping to Vercel and promoted the exact 1,000-row catalog to Neon.
+- Passed the production catalog audit with 1,000 descriptions, 71 families, 918 profiles, and the same 41/31 split across 72 full filter combinations.
+- Passed seven live matching filter requests across all six cuisine groups and OR/AND selection, plus the HTTP 400 `no_matching_foods` path.
+- Removed all temporary live-smoke sessions and exposures and confirmed zero matching records remained.
 
 ## 2026-08-11 — Per-food catalog quality pass
 
