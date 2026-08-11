@@ -50,6 +50,7 @@ The application is live on Vercel with a Neon free PostgreSQL database. The full
 - Added a database audit command that detects missing, extra, or drifted rows and runs all 72 full temperature/staple/cuisine/spice filter combinations.
 - Confirmed 41 meaningful full combinations return candidates and 31 semantically empty combinations follow the explicit no-match path.
 - Verified idempotent local seeding with `0 created, 1000 updated, 0 deactivated` on the second run.
+- Switched the seed command to batched create/update operations after the first remote run exposed per-row network round trips at the new scale.
 
 ## 2026-08-11 — Per-food catalog quality pass
 

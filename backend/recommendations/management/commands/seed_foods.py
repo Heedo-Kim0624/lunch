@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.utils import timezone
 
 from recommendations.models import Food
 from recommendations.seed_data import ATTRIBUTE_NAMES, FOODS, LEGACY_NAME_ALIASES
@@ -13,24 +14,46 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args: object, **options: object) -> None:
         self._normalize_legacy_names()
-        created = 0
-        updated = 0
         catalog_names = [str(item["canonical_name"]) for item in FOODS]
         deactivated = Food.objects.filter(is_active=True).exclude(
             canonical_name__in=catalog_names
         ).update(is_active=False)
+
+        existing_by_name = {
+            food.canonical_name: food
+            for food in Food.objects.filter(canonical_name__in=catalog_names)
+        }
+        to_create: list[Food] = []
+        to_update: list[Food] = []
+        update_fields = [
+            "family",
+            "description",
+            "cuisine",
+            "meal_style",
+            "staple_types",
+            "attributes",
+            "is_lunch_suitable",
+            "is_active",
+            "updated_at",
+        ]
+        now = timezone.now()
         for item in FOODS:
-            _, was_created = Food.objects.update_or_create(
-                canonical_name=item["canonical_name"],
-                defaults={key: value for key, value in item.items() if key != "canonical_name"},
-            )
-            if was_created:
-                created += 1
-            else:
-                updated += 1
+            name = str(item["canonical_name"])
+            defaults = {key: value for key, value in item.items() if key != "canonical_name"}
+            food = existing_by_name.get(name)
+            if food is None:
+                to_create.append(Food(canonical_name=name, **defaults))
+                continue
+            for field, value in defaults.items():
+                setattr(food, field, value)
+            food.updated_at = now
+            to_update.append(food)
+
+        Food.objects.bulk_create(to_create, batch_size=250)
+        Food.objects.bulk_update(to_update, update_fields, batch_size=250)
         self.stdout.write(
             self.style.SUCCESS(
-                f"Seeded foods: {created} created, {updated} updated, "
+                f"Seeded foods: {len(to_create)} created, {len(to_update)} updated, "
                 f"{deactivated} deactivated, {len(FOODS)} total"
             )
         )
