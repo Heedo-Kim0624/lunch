@@ -49,7 +49,7 @@ The application is live on Vercel with a Neon free PostgreSQL database. The full
 - Verified staple memberships of rice 531, bread 122, and noodle 196; menus may have multiple staples or none.
 - Added a database audit command that detects missing, extra, or drifted rows and runs all 72 full temperature/staple/cuisine/spice filter combinations.
 - Confirmed 41 meaningful full combinations return candidates and 31 semantically empty combinations follow the explicit no-match path.
-- Verified idempotent local seeding with `0 created, 1000 updated, 0 deactivated` on the second run.
+- Verified idempotent local seeding with `0 created, 0 updated, 1000 unchanged, 0 deactivated` on the second run.
 - Switched the seed command to batched create/update operations after the first remote run exposed per-row network round trips at the new scale.
 
 ## 2026-08-11 — Per-food catalog quality pass

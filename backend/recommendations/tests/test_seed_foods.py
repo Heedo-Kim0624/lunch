@@ -106,7 +106,7 @@ def test_seed_command_is_idempotent() -> None:
 
     assert Food.objects.count() == len(FOODS)
     assert f"{len(FOODS)} created" in first_output.getvalue()
-    assert f"{len(FOODS)} updated" in second_output.getvalue()
+    assert f"{len(FOODS)} unchanged" in second_output.getvalue()
     assert Food.objects.filter(is_active=True, is_lunch_suitable=True).count() == len(FOODS)
 
 

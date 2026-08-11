@@ -39,7 +39,7 @@ State: **PASS** for local SQLite. The 1,000-menu Vercel + Neon promotion is pend
 - [x] The complete 72-case temperature/staple/cuisine/spice matrix is audited; 41 meaningful intersections are nonempty and 31 semantic impossibilities use explicit no-match handling.
 - [x] Local seeded HTTP smoke returned a hot, spicy, Japanese noodle under combined filters and returned HTTP 400 `no_matching_foods` for an impossible combination; temporary records were removed.
 - [x] The filter dialog uses native checkboxes, visible selection state, focus trapping, Escape/backdrop close, and trigger-focus restoration.
-- [x] Two consecutive seed runs finish with 1,000 active menus and no duplicates; the second reports `0 created, 1000 updated, 0 deactivated`.
+- [x] Two consecutive seed runs finish with 1,000 active menus and no duplicates; the second reports `0 created, 0 updated, 1000 unchanged, 0 deactivated`.
 - [x] A 60-request catalog smoke test returned 55 unique foods across 21 families; temporary sessions were removed.
 - [x] Motion is disabled for `prefers-reduced-motion`.
 - [x] GNN, pgvector, restaurant providers, payment, and location remain out of MVP scope.

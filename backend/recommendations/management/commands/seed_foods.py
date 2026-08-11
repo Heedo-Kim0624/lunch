@@ -25,6 +25,7 @@ class Command(BaseCommand):
         }
         to_create: list[Food] = []
         to_update: list[Food] = []
+        unchanged = 0
         update_fields = [
             "family",
             "description",
@@ -44,6 +45,9 @@ class Command(BaseCommand):
             if food is None:
                 to_create.append(Food(canonical_name=name, **defaults))
                 continue
+            if all(getattr(food, field) == value for field, value in defaults.items()):
+                unchanged += 1
+                continue
             for field, value in defaults.items():
                 setattr(food, field, value)
             food.updated_at = now
@@ -54,7 +58,7 @@ class Command(BaseCommand):
         self.stdout.write(
             self.style.SUCCESS(
                 f"Seeded foods: {len(to_create)} created, {len(to_update)} updated, "
-                f"{deactivated} deactivated, {len(FOODS)} total"
+                f"{unchanged} unchanged, {deactivated} deactivated, {len(FOODS)} total"
             )
         )
 
