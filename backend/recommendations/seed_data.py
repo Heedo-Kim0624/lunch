@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 
+from recommendations.food_details import COLD_SCORES, FOOD_DETAILS
+
 ATTRIBUTE_NAMES = (
     "spicy",
     "broth",
@@ -38,20 +40,33 @@ def _group(
     description: str,
     attributes: Mapping[str, float],
 ) -> list[dict[str, object]]:
-    complete_attributes = {**BASE_ATTRIBUTES, **attributes}
-    return [
-        {
-            "canonical_name": name,
-            "family": family,
-            "cuisine": cuisine,
-            "meal_style": meal_style,
-            "description": description,
-            "attributes": complete_attributes.copy(),
-            "is_lunch_suitable": True,
-            "is_active": True,
-        }
-        for name in names
-    ]
+    foods: list[dict[str, object]] = []
+    for name in names:
+        detail = FOOD_DETAILS[name]
+        individual_attributes = dict(
+            zip(
+                ATTRIBUTE_NAMES,
+                detail.score_values(cold=COLD_SCORES.get(name, 0.0)),
+                strict=True,
+            )
+        )
+        foods.append(
+            {
+                "canonical_name": name,
+                "family": family,
+                "cuisine": cuisine,
+                "meal_style": meal_style,
+                "description": detail.description or description,
+                "attributes": {
+                    **BASE_ATTRIBUTES,
+                    **attributes,
+                    **individual_attributes,
+                },
+                "is_lunch_suitable": True,
+                "is_active": True,
+            }
+        )
+    return foods
 
 
 FOODS = tuple(

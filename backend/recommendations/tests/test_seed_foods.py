@@ -5,6 +5,7 @@ from random import Random
 import pytest
 from django.core.management import call_command
 
+from recommendations.food_details import COLD_SCORES, FOOD_DETAILS
 from recommendations.management.commands.seed_foods import ATTRIBUTE_NAMES, FOODS
 from recommendations.models import Food
 from recommendations.services.scoring import CANDIDATE_POOL_SIZE, create_recommendation
@@ -12,10 +13,18 @@ from recommendations.services.scoring import CANDIDATE_POOL_SIZE, create_recomme
 
 def test_seed_catalog_has_large_unique_complete_menu_set() -> None:
     names = [item["canonical_name"] for item in FOODS]
+    descriptions = [item["description"] for item in FOODS]
+    attribute_profiles = {
+        tuple(item["attributes"][name] for name in ATTRIBUTE_NAMES) for item in FOODS
+    }
 
     assert len(FOODS) >= 200
     assert len(names) == len(set(names))
+    assert set(names) == set(FOOD_DETAILS)
     assert all(name == name.strip() and name for name in names)
+    assert len(descriptions) == len(set(descriptions))
+    assert len(attribute_profiles) >= 280
+    assert set(COLD_SCORES) <= set(names)
 
     for item in FOODS:
         assert item["family"]
@@ -24,6 +33,23 @@ def test_seed_catalog_has_large_unique_complete_menu_set() -> None:
         assert item["description"]
         assert set(item["attributes"]) == set(ATTRIBUTE_NAMES)
         assert all(0.0 <= value <= 1.0 for value in item["attributes"].values())
+        assert item["attributes"]["cold"] == COLD_SCORES.get(item["canonical_name"], 0.0)
+
+
+def test_individual_food_details_cover_known_edge_cases() -> None:
+    by_name = {item["canonical_name"]: item for item in FOODS}
+
+    assert "돼지갈비" in by_name["바쿠테"]["description"]
+    assert by_name["바쿠테"]["attributes"]["broth"] >= 0.8
+    assert by_name["바쿠테"]["attributes"]["light"] <= 0.5
+    assert by_name["바쿠테"]["attributes"]["adventurous"] >= 0.6
+    assert by_name["바쿠테"]["attributes"]["familiar"] <= 0.5
+    assert by_name["카오만가이"]["attributes"]["spicy"] <= 0.2
+    assert by_name["물냉면"]["attributes"]["cold"] >= 0.8
+    assert by_name["마라탕"]["attributes"]["spicy"] >= 0.8
+    assert by_name["마라탕"]["attributes"]["light"] <= 0.4
+    assert by_name["닭가슴살샐러드"]["attributes"]["light"] >= 0.7
+    assert "튀기" in by_name["피시앤칩스"]["description"]
 
 
 @pytest.mark.django_db

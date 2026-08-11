@@ -58,7 +58,9 @@ def test_recommendation_creates_session_and_exposure(
     payload = response.json()
     assert payload["food"]["name"] in {food.canonical_name for food in foods}
     assert payload["policy_version"] == "rules-v2"
-    assert payload["reason"]
+    assert payload["reason"] == (
+        "아직 선택 기록이 없어 인기와 메뉴 다양성을 기준으로 고른 첫 후보예요."
+    )
     assert RecommendationSession.objects.count() == 1
     assert RecommendationExposure.objects.count() == 1
     session = RecommendationSession.objects.get()

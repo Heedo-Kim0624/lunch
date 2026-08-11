@@ -37,3 +37,5 @@
 - [x] Publish the public GitHub repository and pass GitHub Actions.
 - [x] Provision Neon, migrate and seed 342 production foods.
 - [x] Deploy the Vercel API and web projects and pass the disposable production account smoke test.
+- [x] Replace repeated catalog copy with 342 item-specific descriptions and recalibrated recommendation attributes.
+- [x] Add an honest cold-start recommendation reason and catalog-quality regression tests.

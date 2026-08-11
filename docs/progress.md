@@ -40,3 +40,13 @@ The application is live on Vercel with a Neon free PostgreSQL database. The full
 - Measure actual acceptance, reroll, and repeat rates before considering collaborative or graph-based models.
 - Add email verification, password reset, account deletion, and an operator contact before inviting real users.
 - Replace the local-storage API token with an HttpOnly secure-cookie flow before a broader public launch.
+
+## 2026-08-11 — Per-food catalog quality pass
+
+- Replaced 23 repeated family descriptions with 342 unique, item-specific food descriptions.
+- Recalibrated all eight recommendation attributes per item, including explicit cold-dish handling and Korean-audience familiarity/adventurousness.
+- Increased the catalog from 23 repeated attribute profiles to 294 distinct profiles while retaining bounded 0–1 values.
+- Corrected known semantic failures such as 바쿠테, 카오만가이, 팟씨유, 수제비, 마라탕, 아사이볼, and 피시앤칩스.
+- Added coverage, uniqueness, distribution, and edge-case regression checks.
+- Replaced the misleading first-use reason with an explicit cold-start explanation based on popularity and menu diversity.
+- Verified 19 backend tests, 5 frontend tests, Ruff, ESLint, Django checks, migration drift, TypeScript, and the Nuxt production build.

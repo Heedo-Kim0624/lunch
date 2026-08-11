@@ -239,7 +239,16 @@ def _sample_index(probabilities: list[float], rng: Random | SystemRandom) -> int
     return len(probabilities) - 1
 
 
-def _recommendation_reason(food: Food, context: dict[str, object], score: ScoreBreakdown) -> str:
+def _recommendation_reason(
+    food: Food,
+    context: dict[str, object],
+    score: ScoreBreakdown,
+    *,
+    has_history: bool,
+) -> str:
+    if not has_history:
+        return "아직 선택 기록이 없어 인기와 메뉴 다양성을 기준으로 고른 첫 후보예요."
+
     weather = str(context.get("weather", "")).upper()
     temperature = context.get("temperature")
     if weather == "RAIN" and _attribute(food, "broth") >= 0.65:
@@ -253,7 +262,9 @@ def _recommendation_reason(food: Food, context: dict[str, object], score: ScoreB
     if score.preference >= 0.65:
         return "지금까지 남긴 선택과 비슷한 결을 가진 메뉴예요."
     if score.novelty >= 0.9:
-        return "최근 선택과 겹치지 않는 익숙한 점심 후보예요."
+        if _attribute(food, "familiar") >= 0.65:
+            return "최근 선택과 겹치지 않는 익숙한 점심 후보예요."
+        return "최근 선택과 겹치지 않는 새로운 점심 후보예요."
     return "취향과 최근 중복을 함께 고려한 오늘의 후보예요."
 
 
@@ -312,5 +323,5 @@ def create_recommendation(
         total_score=score.total,
         score_breakdown=score.as_dict(),
         selection_probability=probabilities[index],
-        reason=_recommendation_reason(food, context, score),
+        reason=_recommendation_reason(food, context, score, has_history=bool(history)),
     )

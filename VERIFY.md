@@ -14,7 +14,7 @@ State: **PASS** for local SQLite and live Vercel + Neon production.
   - Django system check: pass
   - Django migration drift check: pass (`No changes detected`)
   - Nuxt TypeScript check: pass
-  - Backend pytest: 18 passed
+  - Backend pytest: 19 passed
   - Frontend Vitest: 5 passed
   - Nuxt production build: pass
 - [x] In-process Django client smoke test:
@@ -30,7 +30,10 @@ State: **PASS** for local SQLite and live Vercel + Neon production.
 - [x] Duplicate feedback is idempotent.
 - [x] Feedback ownership is checked against the anonymous or authenticated server-owned identity.
 - [x] Recommendation reasons are derived from actual score factors.
-- [x] Seed catalog contains 342 unique menus with all eight attributes bounded to 0–1.
+- [x] Seed catalog contains 342 unique menus, 342 unique item-specific descriptions, and all eight attributes bounded to 0–1.
+- [x] Individual profiles produce 294 distinct attribute combinations; cold scores are allowlisted to genuinely cold or chilled dishes.
+- [x] Edge-case assertions cover 바쿠테 broth/light/familiarity, 카오만가이 spice, 물냉면 temperature, 마라탕 spice/light, 닭가슴살샐러드 lightness, and 피시앤칩스 preparation.
+- [x] A cold-start recommendation explicitly says that no selection history exists and does not claim to avoid prior choices.
 - [x] Two consecutive seed runs finish with 342 active menus and no duplicates.
 - [x] A 60-request catalog smoke test returned 55 unique foods across 21 families; temporary sessions were removed.
 - [x] Motion is disabled for `prefers-reduced-motion`.
