@@ -62,3 +62,6 @@ The application is live on Vercel with a Neon free PostgreSQL database. The full
 - Passed local API smoke checks for a matching combined filter and the explicit `no_matching_foods` error path; temporary records were removed.
 - Verified the full gate: 33 backend tests, 8 frontend tests, Ruff, ESLint, Django checks, migration drift, TypeScript, and the Nuxt production build all pass.
 - Browser automation was unavailable in the current runtime, so manual visual, cross-browser, and physical mobile checks remain open.
+- Pushed commit `f172381`, passed GitHub Actions run `31474772129`, and deployed both Vercel production projects.
+- Applied migration `0004`, updated all 342 Neon rows, and verified production membership counts of 172 rice, 41 bread, and 79 noodle.
+- Passed live combined-filter, no-match, and web-trigger smoke checks; database values matched the requested filters and all temporary smoke data was removed.
