@@ -1,0 +1,24 @@
+{
+  "name": "lunch-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev --host 127.0.0.1",
+    "lint": "eslint .",
+    "postinstall": "nuxt prepare",
+    "test": "vitest run",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "nuxt": "^4.5.2"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.17.0",
+    "@types/node": "^24.0.0",
+    "eslint": "^10.8.1",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.10",
+    "vue-tsc": "^3.3.9"
+  }
+}

@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: lunch
+      POSTGRES_USER: lunch
+      POSTGRES_PASSWORD: lunch-local-only
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lunch -d lunch"]
+      interval: 3s
+      timeout: 3s
+      retries: 15
+    volumes:
+      - lunch-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  lunch-postgres-data:
+

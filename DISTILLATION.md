@@ -1,0 +1,34 @@
+# Distillation Plan
+
+## Durable project knowledge
+
+- The product is a personalized decision engine presented as a single lever, not a random menu picker.
+- The active policy is `rules-v2`: content attributes, recent-event decay, context adjustments, repetition penalties, tie rotation, family-round-robin pooling, and bounded softmax exploration.
+- Every recommendation stores the policy version, candidate count, scored top-candidate snapshot, chosen exposure, score breakdown, and selection probability.
+- Only observed user actions become learning signals; a reroll is weak negative evidence and non-exposed foods are never inferred as disliked.
+- SQLite is the zero-setup default. PostgreSQL is an optional parity path, not an MVP dependency.
+- Production uses a Neon pooled `DATABASE_URL`; Vercel must never fall back to SQLite.
+- Authenticated recommendation history belongs to the server-verified account identity, while anonymous users retain device-local history.
+- Passwords use Django validation and hashing. Browser tokens are revocable but remain an MVP local-storage tradeoff that requires HttpOnly-cookie hardening before broad launch.
+- GNN and vector search require measured evidence that simpler baselines are inadequate.
+- Large catalogs need diversity at candidate-pool construction time; adding rows alone does not make them reachable when only a globally ranked top set is sampled.
+
+## Prediction-error memory
+
+- Prefer an explicitly supported Python version for Django even when a newer system runtime is present.
+- Run backend tools from the backend project context so `pyproject.toml` configuration is applied.
+- Exclude virtual environments from static-analysis scope.
+- Pin TypeScript to the version supported by the active Nuxt ESLint chain.
+- Verify framework type dependencies such as `@types/node` during initial setup.
+- When a live server cannot be launched by the environment, exercise the HTTP stack with the framework test client and record that browser validation is still pending.
+- Validate Docker engine availability before attempting the PostgreSQL setup path.
+- Include a migration-drift check in the normal type/check gate.
+
+## Evidence boundary
+
+No credentials, tokens, cookies, account pages, payment data, or private form values were captured. The project used official framework documentation, local source code, generated test output, and local AgentOS records only.
+
+## Destination
+
+- Project work log: the user's private Obsidian vault under `00_Inbox/Code/2026-08-11/`
+- Detailed implementation truth: this repository's `README.md`, `docs/`, `VERIFY.md`, and source/tests
