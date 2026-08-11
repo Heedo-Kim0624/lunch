@@ -1,5 +1,26 @@
 <script setup lang="ts">
-const { state, isBusy, draw, accept, reroll } = useLunchMachine()
+import type {
+  RecommendationFilterKey,
+  RecommendationFilterValue,
+} from '../types/recommendation'
+import {
+  cloneRecommendationFilters,
+  countRecommendationFilters,
+  createEmptyRecommendationFilters,
+  RECOMMENDATION_FILTER_GROUPS,
+  toggleRecommendationFilter,
+} from '../utils/recommendationFilters'
+
+const {
+  state,
+  isBusy,
+  filters,
+  noMatchingFoods,
+  setFilters,
+  draw,
+  accept,
+  reroll,
+} = useLunchMachine()
 const { user } = useAuth()
 
 useHead({
@@ -8,6 +29,72 @@ useHead({
 
 const hasTicket = computed(() => Boolean(state.value.ticket))
 const ticketAccepted = computed(() => state.value.status === 'accepted')
+const filterDialogOpen = ref(false)
+const filterTrigger = ref<HTMLButtonElement | null>(null)
+const filterCloseButton = ref<HTMLButtonElement | null>(null)
+const filterPanel = ref<HTMLElement | null>(null)
+const draftFilters = ref(cloneRecommendationFilters(filters.value))
+const activeFilterCount = computed(() => countRecommendationFilters(filters.value))
+const draftFilterCount = computed(() => countRecommendationFilters(draftFilters.value))
+
+async function openFilterDialog(): Promise<void> {
+  draftFilters.value = cloneRecommendationFilters(filters.value)
+  filterDialogOpen.value = true
+  await nextTick()
+  filterCloseButton.value?.focus()
+}
+
+async function closeFilterDialog(): Promise<void> {
+  filterDialogOpen.value = false
+  await nextTick()
+  filterTrigger.value?.focus()
+}
+
+function toggleDraftFilter(
+  key: RecommendationFilterKey,
+  value: RecommendationFilterValue,
+): void {
+  draftFilters.value = toggleRecommendationFilter(draftFilters.value, key, value)
+}
+
+function clearDraftFilters(): void {
+  draftFilters.value = createEmptyRecommendationFilters()
+}
+
+function applyFilters(): void {
+  setFilters(draftFilters.value)
+  void closeFilterDialog()
+}
+
+function handleFilterDialogKeydown(event: KeyboardEvent): void {
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    void closeFilterDialog()
+    return
+  }
+  if (event.key !== 'Tab' || !filterPanel.value) {
+    return
+  }
+
+  const focusable = Array.from(
+    filterPanel.value.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    ),
+  )
+  const first = focusable[0]
+  const last = focusable.at(-1)
+  if (!first || !last) {
+    return
+  }
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault()
+    last.focus()
+  }
+  else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault()
+    first.focus()
+  }
+}
 </script>
 
 <template>
@@ -27,11 +114,22 @@ const ticketAccepted = computed(() => state.value.status === 'accepted')
         <span class="bolt bolt-bottom-left" aria-hidden="true" />
         <span class="bolt bolt-bottom-right" aria-hidden="true" />
 
-        <div class="machine-label" aria-hidden="true">
+        <button
+          ref="filterTrigger"
+          class="machine-label"
+          type="button"
+          aria-haspopup="dialog"
+          :aria-expanded="filterDialogOpen"
+          aria-controls="recommendation-filter-dialog"
+          @click="openFilterDialog"
+        >
           <span>오늘의</span>
           <strong>점심</strong>
-          <small>DECISION SERVICE</small>
-        </div>
+          <small>{{ activeFilterCount ? `조건 ${activeFilterCount}개 선택` : '조건 고르기' }}</small>
+          <b v-if="activeFilterCount" class="filter-count" aria-hidden="true">
+            {{ activeFilterCount }}
+          </b>
+        </button>
 
         <div class="ticket-window" aria-live="polite" aria-atomic="true">
           <div
@@ -120,9 +218,9 @@ const ticketAccepted = computed(() => state.value.status === 'accepted')
       v-else-if="state.status === 'error'"
       class="retry-button"
       type="button"
-      @click="draw"
+      @click="noMatchingFoods ? openFilterDialog() : draw()"
     >
-      다시 시도하기
+      {{ noMatchingFoods ? '조건 다시 고르기' : '다시 시도하기' }}
     </button>
 
     <footer class="page-footer">
@@ -131,5 +229,80 @@ const ticketAccepted = computed(() => state.value.status === 'accepted')
       <span aria-hidden="true">●</span>
       <p><NuxtLink to="/privacy">정밀 위치는 수집하지 않습니다.</NuxtLink></p>
     </footer>
+
+    <Teleport to="body">
+      <div
+        v-if="filterDialogOpen"
+        class="filter-overlay"
+        @click.self="closeFilterDialog"
+        @keydown="handleFilterDialogKeydown"
+      >
+        <section
+          id="recommendation-filter-dialog"
+          ref="filterPanel"
+          class="filter-panel"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="filter-dialog-title"
+          aria-describedby="filter-dialog-help"
+        >
+          <header class="filter-panel-header">
+            <div>
+              <p>MENU SELECTOR · MULTI</p>
+              <h2 id="filter-dialog-title">먹고 싶은 조건</h2>
+            </div>
+            <button
+              ref="filterCloseButton"
+              class="filter-close"
+              type="button"
+              aria-label="조건 선택 창 닫기"
+              @click="closeFilterDialog"
+            >
+              ×
+            </button>
+          </header>
+
+          <p id="filter-dialog-help" class="filter-help">
+            한 줄에서 여러 개를 고르면 후보가 늘고, 줄과 줄 사이는 모두 만족하는 메뉴만 남아요.
+            아무것도 고르지 않은 줄은 제한하지 않습니다.
+          </p>
+
+          <div class="filter-groups">
+            <fieldset
+              v-for="group in RECOMMENDATION_FILTER_GROUPS"
+              :key="group.key"
+              class="filter-group"
+            >
+              <legend>{{ group.label }}</legend>
+              <div class="filter-options">
+                <label
+                  v-for="option in group.options"
+                  :key="option.value"
+                  class="filter-option"
+                  :class="{ 'filter-option-selected': draftFilters[group.key].includes(option.value) }"
+                >
+                  <input
+                    type="checkbox"
+                    :checked="draftFilters[group.key].includes(option.value)"
+                    @change="toggleDraftFilter(group.key, option.value)"
+                  >
+                  <span aria-hidden="true">✓</span>
+                  {{ option.label }}
+                </label>
+              </div>
+            </fieldset>
+          </div>
+
+          <footer class="filter-panel-actions">
+            <button class="filter-reset" type="button" @click="clearDraftFilters">
+              모두 지우기
+            </button>
+            <button class="filter-apply" type="button" @click="applyFilters">
+              {{ draftFilterCount ? `조건 ${draftFilterCount}개 적용` : '조건 없이 적용' }}
+            </button>
+          </footer>
+        </section>
+      </div>
+    </Teleport>
   </main>
 </template>

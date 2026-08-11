@@ -9,6 +9,7 @@ from random import Random, SystemRandom
 from django.db import transaction
 from django.utils import timezone
 
+from recommendations.filters import filter_foods, normalize_filters
 from recommendations.models import (
     Food,
     RecommendationExposure,
@@ -16,7 +17,7 @@ from recommendations.models import (
     UserFoodEvent,
 )
 
-POLICY_VERSION = "rules-v2"
+POLICY_VERSION = "rules-v3"
 CANDIDATE_POOL_SIZE = 24
 MAX_FOODS_PER_FAMILY = 2
 SOFTMAX_TEMPERATURE = 0.18
@@ -37,6 +38,10 @@ PREFERENCE_ATTRIBUTES = (
     "cold",
     "familiar",
 )
+
+
+class NoMatchingFoodsError(Exception):
+    """Raised when active foods exist but none satisfy the selected filters."""
 
 
 @dataclass(frozen=True)
@@ -245,8 +250,11 @@ def _recommendation_reason(
     score: ScoreBreakdown,
     *,
     has_history: bool,
+    has_filters: bool = False,
 ) -> str:
     if not has_history:
+        if has_filters:
+            return "선택한 조건에 맞는 메뉴 중 인기와 다양성을 기준으로 고른 첫 후보예요."
         return "아직 선택 기록이 없어 인기와 메뉴 다양성을 기준으로 고른 첫 후보예요."
 
     weather = str(context.get("weather", "")).upper()
@@ -272,11 +280,16 @@ def _recommendation_reason(
 def create_recommendation(
     anonymous_id: str,
     context: dict[str, object],
+    filters: dict[str, object] | None = None,
     rng: Random | SystemRandom | None = None,
 ) -> RecommendationExposure:
-    foods = list(Food.objects.filter(is_active=True, is_lunch_suitable=True))
-    if not foods:
+    active_foods = list(Food.objects.filter(is_active=True, is_lunch_suitable=True))
+    if not active_foods:
         raise Food.DoesNotExist("No active lunch foods are available")
+    normalized_filters = normalize_filters(filters)
+    foods = filter_foods(active_foods, normalized_filters)
+    if not foods:
+        raise NoMatchingFoodsError("No foods match the selected filters")
 
     now = timezone.now()
     history = list(
@@ -299,6 +312,7 @@ def create_recommendation(
             "food_name": candidate.canonical_name,
             "family": candidate.family,
             "cuisine": candidate.cuisine,
+            "staple_types": candidate.staple_types,
             "rank": rank,
             "total_score": round(candidate_score.total, 4),
             "selection_probability": round(probability, 6),
@@ -309,9 +323,13 @@ def create_recommendation(
         )
     ]
 
+    session_context = dict(context)
+    if normalized_filters:
+        session_context["filters"] = normalized_filters
+
     session = RecommendationSession.objects.create(
         anonymous_id=anonymous_id,
-        context=context,
+        context=session_context,
         policy_version=POLICY_VERSION,
         candidate_count=len(scored),
         candidate_snapshot=candidate_snapshot,
@@ -323,5 +341,11 @@ def create_recommendation(
         total_score=score.total,
         score_breakdown=score.as_dict(),
         selection_probability=probabilities[index],
-        reason=_recommendation_reason(food, context, score, has_history=bool(history)),
+        reason=_recommendation_reason(
+            food,
+            context,
+            score,
+            has_history=bool(history),
+            has_filters=bool(normalized_filters),
+        ),
     )

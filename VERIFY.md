@@ -14,12 +14,12 @@ State: **PASS** for local SQLite and live Vercel + Neon production.
   - Django system check: pass
   - Django migration drift check: pass (`No changes detected`)
   - Nuxt TypeScript check: pass
-  - Backend pytest: 19 passed
-  - Frontend Vitest: 5 passed
+  - Backend pytest: 33 passed
+  - Frontend Vitest: 8 passed
   - Nuxt production build: pass
 - [x] In-process Django client smoke test:
   - health: HTTP 200
-  - recommendation: HTTP 201, policy `rules-v2`
+  - recommendation: HTTP 201, policy `rules-v3`
   - feedback: HTTP 201, event `ACCEPTED`
   - temporary smoke-test records removed afterward
 - [x] `docker compose config --quiet`: pass.
@@ -34,6 +34,10 @@ State: **PASS** for local SQLite and live Vercel + Neon production.
 - [x] Individual profiles produce 294 distinct attribute combinations; cold scores are allowlisted to genuinely cold or chilled dishes.
 - [x] Edge-case assertions cover 바쿠테 broth/light/familiarity, 카오만가이 spice, 물냉면 temperature, 마라탕 spice/light, 닭가슴살샐러드 lightness, and 피시앤칩스 preparation.
 - [x] A cold-start recommendation explicitly says that no selection history exists and does not claim to avoid prior choices.
+- [x] All 342 seed menus expose only reviewed zero-or-more `rice`, `bread`, and `noodle` memberships; distribution is 172, 41, and 79 memberships respectively.
+- [x] Unit and API tests prove same-group OR, cross-group AND, empty-group unrestricted behavior, cuisine grouping, invalid-value rejection, and explicit no-match handling.
+- [x] Local seeded HTTP smoke returned a hot, spicy, Japanese noodle under combined filters and returned HTTP 400 `no_matching_foods` for an impossible combination; temporary records were removed.
+- [x] The filter dialog uses native checkboxes, visible selection state, focus trapping, Escape/backdrop close, and trigger-focus restoration.
 - [x] Two consecutive seed runs finish with 342 active menus and no duplicates.
 - [x] A 60-request catalog smoke test returned 55 unique foods across 21 families; temporary sessions were removed.
 - [x] Motion is disabled for `prefers-reduced-motion`.
@@ -57,7 +61,7 @@ State: **PASS** for local SQLite and live Vercel + Neon production.
 ## Not yet verified
 
 - [ ] Live PostgreSQL migration/test path: Docker Desktop's Linux engine was not running.
-- [ ] Manual browser visual and keyboard pass: server process launch was blocked by the execution environment, so UI evidence is currently build-, type-, and unit-test-based.
+- [ ] Manual browser visual and keyboard pass: local servers launched and API smoke passed, but the available browser-control runtime reported no browser backend; UI evidence remains build-, type-, and unit-test-based.
 - [ ] Cross-browser and mobile-device behavior.
 
 ## Evidence

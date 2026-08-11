@@ -39,3 +39,6 @@
 - [x] Deploy the Vercel API and web projects and pass the disposable production account smoke test.
 - [x] Replace repeated catalog copy with 342 item-specific descriptions and recalibrated recommendation attributes.
 - [x] Add an honest cold-start recommendation reason and catalog-quality regression tests.
+- [x] Add reviewed rice, bread, and noodle memberships for all 342 menus.
+- [x] Add tested same-group OR and cross-group AND recommendation filters.
+- [x] Add the accessible machine-label multi-select filter dialog and empty-result recovery.

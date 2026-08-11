@@ -10,6 +10,8 @@ from recommendations.management.commands.seed_foods import ATTRIBUTE_NAMES, FOOD
 from recommendations.models import Food
 from recommendations.services.scoring import CANDIDATE_POOL_SIZE, create_recommendation
 
+STAPLE_TYPES = {"rice", "bread", "noodle"}
+
 
 def test_seed_catalog_has_large_unique_complete_menu_set() -> None:
     names = [item["canonical_name"] for item in FOODS]
@@ -26,11 +28,20 @@ def test_seed_catalog_has_large_unique_complete_menu_set() -> None:
     assert len(attribute_profiles) >= 280
     assert set(COLD_SCORES) <= set(names)
 
+    staple_counts = Counter(
+        staple for item in FOODS for staple in item["staple_types"]
+    )
+    assert set(staple_counts) == STAPLE_TYPES
+    assert all(staple_counts[staple] >= 30 for staple in STAPLE_TYPES)
+
     for item in FOODS:
         assert item["family"]
         assert item["cuisine"]
         assert item["meal_style"]
         assert item["description"]
+        assert isinstance(item["staple_types"], list)
+        assert set(item["staple_types"]) <= STAPLE_TYPES
+        assert len(item["staple_types"]) == len(set(item["staple_types"]))
         assert set(item["attributes"]) == set(ATTRIBUTE_NAMES)
         assert all(0.0 <= value <= 1.0 for value in item["attributes"].values())
         assert item["attributes"]["cold"] == COLD_SCORES.get(item["canonical_name"], 0.0)
@@ -50,6 +61,11 @@ def test_individual_food_details_cover_known_edge_cases() -> None:
     assert by_name["마라탕"]["attributes"]["light"] <= 0.4
     assert by_name["닭가슴살샐러드"]["attributes"]["light"] >= 0.7
     assert "튀기" in by_name["피시앤칩스"]["description"]
+    assert by_name["비빔밥"]["staple_types"] == ["rice"]
+    assert by_name["반미"]["staple_types"] == ["bread"]
+    assert by_name["쌀국수"]["staple_types"] == ["noodle"]
+    assert set(by_name["부리토"]["staple_types"]) == {"rice", "bread"}
+    assert by_name["스테이크"]["staple_types"] == []
 
 
 @pytest.mark.django_db
@@ -91,7 +107,7 @@ def test_large_catalog_builds_a_diverse_auditable_candidate_pool() -> None:
     snapshot = exposure.session.candidate_snapshot
     family_counts = Counter(candidate["family"] for candidate in snapshot)
 
-    assert exposure.session.policy_version == "rules-v2"
+    assert exposure.session.policy_version == "rules-v3"
     assert exposure.session.candidate_count == len(FOODS)
     assert len(snapshot) == CANDIDATE_POOL_SIZE
     assert len(family_counts) == len({item["family"] for item in FOODS})

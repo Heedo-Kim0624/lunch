@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 import type {
   FeedbackType,
   RecommendationApiResponse,
+  RecommendationFilters,
   RecommendationTicket,
 } from '../types/recommendation'
 import {
@@ -13,6 +14,10 @@ import {
   showTicket,
   startReroll,
 } from '../utils/lunchMachine'
+import {
+  cloneRecommendationFilters,
+  createEmptyRecommendationFilters,
+} from '../utils/recommendationFilters'
 
 const DEVICE_ID_KEY = 'lunch-machine-device-id'
 
@@ -54,11 +59,31 @@ function toTicket(response: RecommendationApiResponse): RecommendationTicket {
   }
 }
 
-function errorMessage(error: unknown): string {
-  if (error instanceof Error && error.message) {
-    return '추천 서버와 연결하지 못했어요. 잠시 후 다시 당겨 주세요.'
+interface RecommendationError {
+  message: string
+  noMatches: boolean
+}
+
+function errorDetails(error: unknown): RecommendationError {
+  if (typeof error === 'object' && error !== null && 'data' in error) {
+    const data = (error as { data?: unknown }).data
+    if (typeof data === 'object' && data !== null) {
+      const payload = data as { code?: unknown, detail?: unknown }
+      if (payload.code === 'no_matching_foods' && typeof payload.detail === 'string') {
+        return { message: payload.detail, noMatches: true }
+      }
+      if (typeof payload.detail === 'string') {
+        return { message: payload.detail, noMatches: false }
+      }
+    }
   }
-  return '점심표를 만드는 중 문제가 생겼어요.'
+  if (error instanceof Error && error.message) {
+    return {
+      message: '추천 서버와 연결하지 못했어요. 잠시 후 다시 당겨 주세요.',
+      noMatches: false,
+    }
+  }
+  return { message: '점심표를 만드는 중 문제가 생겼어요.', noMatches: false }
 }
 
 export function useLunchMachine() {
@@ -66,6 +91,8 @@ export function useLunchMachine() {
   const { authorizationHeaders } = useAuth()
   const state = ref(createInitialMachineState())
   const isSendingFeedback = ref(false)
+  const filters = ref(createEmptyRecommendationFilters())
+  const noMatchingFoods = ref(false)
 
   const isBusy = computed(
     () =>
@@ -76,6 +103,7 @@ export function useLunchMachine() {
 
   async function requestRecommendation(): Promise<void> {
     state.value = beginDraw()
+    noMatchingFoods.value = false
     try {
       const response = await $fetch<RecommendationApiResponse>(
         `${config.public.apiBase}/recommendations`,
@@ -85,13 +113,16 @@ export function useLunchMachine() {
           body: {
             anonymous_id: getDeviceId(),
             context: getAutomaticContext(),
+            filters: filters.value,
           },
         },
       )
       state.value = showTicket(state.value, toTicket(response))
     }
     catch (error) {
-      state.value = failMachine(state.value, errorMessage(error))
+      const details = errorDetails(error)
+      noMatchingFoods.value = details.noMatches
+      state.value = failMachine(state.value, details.message)
     }
   }
 
@@ -120,7 +151,7 @@ export function useLunchMachine() {
       state.value = acceptTicket(state.value)
     }
     catch (error) {
-      state.value = failMachine(state.value, errorMessage(error))
+      state.value = failMachine(state.value, errorDetails(error).message)
     }
     finally {
       isSendingFeedback.value = false
@@ -137,13 +168,20 @@ export function useLunchMachine() {
       await requestRecommendation()
     }
     catch (error) {
-      state.value = failMachine(state.value, errorMessage(error))
+      state.value = failMachine(state.value, errorDetails(error).message)
     }
+  }
+
+  function setFilters(nextFilters: RecommendationFilters): void {
+    filters.value = cloneRecommendationFilters(nextFilters)
   }
 
   return {
     state,
     isBusy,
+    filters,
+    noMatchingFoods,
+    setFilters,
     draw: requestRecommendation,
     accept,
     reroll,

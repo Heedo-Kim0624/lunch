@@ -12,7 +12,8 @@
 - [x] Registration, login, logout, password hashing/validation, and server-owned identity are tested.
 - [x] Production settings require a persistent database, secret key, HTTPS, and explicit CORS origin.
 - [x] GitHub Actions and a secret-free Vercel/Neon runbook are present.
+- [x] Multi-select filters have explicit OR/AND semantics, validation, no-match recovery, and keyboard-accessible dialog controls.
 - [ ] Live PostgreSQL path verified with Docker Desktop running.
 - [ ] Manual browser and mobile usability reviewed.
-- [ ] Live Neon and Vercel smoke test completed.
+- [x] Live Neon and Vercel account/recommendation smoke test completed for the prior production slice.
 - [ ] Email verification, reset/deletion, operator privacy details, and HttpOnly-cookie hardening completed before inviting users.

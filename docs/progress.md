@@ -52,3 +52,13 @@ The application is live on Vercel with a Neon free PostgreSQL database. The full
 - Verified 19 backend tests, 5 frontend tests, Ruff, ESLint, Django checks, migration drift, TypeScript, and the Nuxt production build.
 - Updated all 342 Neon rows in place and confirmed 342 distinct descriptions, 294 distinct profiles, zero blanks, and 47 explicitly cold dishes in production.
 - Deployed the API, passed a live cold-start recommendation smoke test, and removed its temporary session and exposure.
+
+## 2026-08-11 — Multi-filter recommendation slice
+
+- Added reviewed zero-or-more rice, bread, and noodle classifications to all 342 menus: 172 rice, 41 bread, and 79 noodle memberships, including multi-staple dishes.
+- Added `rules-v3` hard filtering for temperature, staple, cuisine group, and spice before scoring and diverse-pool construction.
+- Defined same-group selections as OR, cross-group selections as AND, and empty groups as unrestricted.
+- Added a machine-label-triggered multi-select dialog with native checkboxes, active-count badge, reset/apply actions, focus trap, Escape/backdrop close, and trigger-focus return.
+- Passed local API smoke checks for a matching combined filter and the explicit `no_matching_foods` error path; temporary records were removed.
+- Verified the full gate: 33 backend tests, 8 frontend tests, Ruff, ESLint, Django checks, migration drift, TypeScript, and the Nuxt production build all pass.
+- Browser automation was unavailable in the current runtime, so manual visual, cross-browser, and physical mobile checks remain open.

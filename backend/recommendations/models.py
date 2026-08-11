@@ -9,6 +9,7 @@ class Food(models.Model):
     description = models.TextField(blank=True)
     cuisine = models.CharField(max_length=80, default="한식")
     meal_style = models.CharField(max_length=80, default="식사")
+    staple_types = models.JSONField(default=list)
     attributes = models.JSONField(default=dict)
     is_lunch_suitable = models.BooleanField(default=True, db_index=True)
     is_active = models.BooleanField(default=True, db_index=True)

@@ -5,7 +5,7 @@
 ```text
 Nuxt 4 web client
   ├─ register / login / account state
-  └─ lever / ticket / feedback
+  └─ multi-filter popup / lever / ticket / feedback
           │ HTTP JSON
           ▼
 Django REST API
@@ -37,7 +37,7 @@ docs/                     product, architecture, decisions, and progress
 
 ```text
 active lunch foods
-→ future hard filters
+→ temperature + staple + cuisine + spice hard filters
 → preference score from decayed explicit events
 → weather/temperature context score
 → novelty and popularity
@@ -70,19 +70,29 @@ Authenticated recommendation and feedback requests use the account identity esta
     "meal_type": "LUNCH",
     "weather": "RAIN",
     "temperature": 29
+  },
+  "filters": {
+    "temperature": ["hot"],
+    "staples": ["rice", "noodle"],
+    "cuisines": ["korean", "japanese"],
+    "spice": ["mild"]
   }
 }
 ```
+
+각 배열 안에서는 하나만 맞아도 통과(OR)하고, 값이 있는 배열끼리는 모두 맞아야 통과(AND)한다. 빈 배열은 해당 그룹을 제한하지 않는다. 필터 결과가 없으면 API는 `400`과 `no_matching_foods` 코드를 반환한다.
 
 ```json
 {
   "recommendation_id": 1,
   "session_id": "uuid",
-  "policy_version": "rules-v2",
+  "policy_version": "rules-v3",
   "food": {
     "id": 1,
     "name": "순두부찌개",
     "family": "찌개",
+    "cuisine": "한식",
+    "staple_types": ["rice"],
     "description": "매콤하고 따뜻한 두부 국물 요리"
   },
   "reason": "비 오는 날에 잘 맞는 따뜻한 국물 메뉴예요.",
@@ -117,7 +127,7 @@ The API rejects feedback when the anonymous ID does not own the exposure.
 - Critical queryable fields remain columns; evolving recommendation context and score explanations use `JSONField`.
 - Recommendation exposure is immutable. Outcomes are appended as `UserFoodEvent` records.
 - Each session stores the 24-item diverse candidate snapshot and conditional selection probabilities for later policy evaluation.
-- A candidate snapshot includes food name, family, cuisine, rank, score, and probability so catalog behavior remains auditable.
+- A candidate snapshot includes food name, family, cuisine, staple types, rank, score, and probability so catalog behavior remains auditable.
 - Repeated delivery of the same feedback type for one exposure is idempotent.
 - Pairwise food similarities are not stored in the MVP.
 
@@ -127,6 +137,7 @@ The API rejects feedback when the anonymous ID does not own the exposure.
 - Astryx was checked first. Its runtime examples are React components, so it is not installed into the Vue application.
 - The implementation adopts the verified Astryx interaction guidance: one primary action, explicit labels, visible loading state, and accessible names.
 - The skeuomorphic lever is a native `button`; visual drag gestures are not required to operate the product.
+- The paper label at the top of the machine is a dialog trigger. Its native checkboxes support multiple selections, visible focus, Escape closing, focus trapping, and focus return.
 
 ## Security And Privacy
 
@@ -150,4 +161,5 @@ The API rejects feedback when the anonymous ID does not own the exposure.
 
 - `recommendations/seed_data.py` contains 342 unique menus across 23 food families and 12 cuisine labels.
 - Every menu carries all eight bounded recommendation attributes.
+- Every menu has a reviewed zero-or-more `rice`, `bread`, and `noodle` classification; multi-staple dishes may belong to more than one.
 - `seed_foods` updates existing rows transactionally and normalizes known legacy names without breaking referenced row IDs.

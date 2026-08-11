@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 
 from recommendations.models import Food, RecommendationExposure, UserFoodEvent
 from recommendations.serializers import FeedbackRequestSerializer, RecommendationRequestSerializer
-from recommendations.services.scoring import create_recommendation
+from recommendations.services.scoring import NoMatchingFoodsError, create_recommendation
 
 
 def request_identity(request: Request, anonymous_id: str) -> str:
@@ -29,6 +29,15 @@ class RecommendationCreateView(APIView):
             exposure = create_recommendation(
                 request_identity(request, serializer.validated_data["anonymous_id"]),
                 serializer.validated_data["context"],
+                serializer.validated_data["filters"],
+            )
+        except NoMatchingFoodsError:
+            return Response(
+                {
+                    "code": "no_matching_foods",
+                    "detail": "선택한 조건에 맞는 메뉴가 없어요. 조건을 조금 넓혀 주세요.",
+                },
+                status=status.HTTP_400_BAD_REQUEST,
             )
         except Food.DoesNotExist:
             return Response(
@@ -45,6 +54,8 @@ class RecommendationCreateView(APIView):
                     "id": exposure.food_id,
                     "name": exposure.food.canonical_name,
                     "family": exposure.food.family,
+                    "cuisine": exposure.food.cuisine,
+                    "staple_types": exposure.food.staple_types,
                     "description": exposure.food.description,
                 },
                 "reason": exposure.reason,

@@ -6,9 +6,10 @@ The first screen should communicate within two seconds: pull once, receive one l
 
 ## Interaction Hierarchy
 
-1. Primary: `점심 추천 레버 당기기`
-2. After a ticket appears: `이걸 먹을래요`
-3. Secondary: `다른 메뉴 뽑기`
+1. Optional setup: machine paper label `조건 고르기`
+2. Primary: `점심 추천 레버 당기기`
+3. After a ticket appears: `이걸 먹을래요`
+4. Secondary: `다른 메뉴 뽑기`
 
 Only one primary action is emphasized in each state. Loading, success, and error states are announced through a polite live region.
 
@@ -26,6 +27,8 @@ Only one primary action is emphasized in each state. Loading, success, and error
 - Pointer target size is at least 44 by 44 CSS pixels.
 - Status changes use `aria-live` and do not rely on color alone.
 - Reduced-motion users receive state changes without lever or ticket travel animation.
+- The filter dialog uses native checkboxes, traps keyboard focus, closes with Escape or the backdrop, and returns focus to its trigger.
+- Filter copy explains same-row OR, cross-row AND, and the unrestricted empty state before users apply selections.
 
 ## Design-system Check
 

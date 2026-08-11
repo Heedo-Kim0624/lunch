@@ -39,7 +39,10 @@ def _group(
     meal_style: str,
     description: str,
     attributes: Mapping[str, float],
+    staple_types: tuple[str, ...] = (),
+    staple_overrides: Mapping[str, tuple[str, ...]] | None = None,
 ) -> list[dict[str, object]]:
+    overrides = staple_overrides or {}
     foods: list[dict[str, object]] = []
     for name in names:
         detail = FOOD_DETAILS[name]
@@ -56,6 +59,7 @@ def _group(
                 "family": family,
                 "cuisine": cuisine,
                 "meal_style": meal_style,
+                "staple_types": list(overrides.get(name, staple_types)),
                 "description": detail.description or description,
                 "attributes": {
                     **BASE_ATTRIBUTES,
@@ -98,6 +102,8 @@ FOODS = tuple(
             family="찌개·전골",
             cuisine="한식",
             meal_style="국물 식사",
+            staple_types=("rice",),
+            staple_overrides={"샤브샤브": ("rice", "noodle")},
             description="뜨끈한 국물과 건더기를 밥과 함께 즐기는 든든한 한식 메뉴",
             attributes={
                 "spicy": 0.55,
@@ -140,6 +146,8 @@ FOODS = tuple(
             family="탕·국밥",
             cuisine="한식",
             meal_style="국물 식사",
+            staple_types=("rice",),
+            staple_overrides={"떡만둣국": ()},
             description="진한 육수와 풍성한 건더기로 속을 채우는 따뜻한 국물 메뉴",
             attributes={
                 "spicy": 0.25,
@@ -177,6 +185,7 @@ FOODS = tuple(
             family="비빔밥·덮밥",
             cuisine="한식",
             meal_style="한 그릇",
+            staple_types=("rice",),
             description="밥과 여러 재료를 한 그릇에 담아 빠르고 든든하게 먹는 메뉴",
             attributes={
                 "spicy": 0.38,
@@ -207,6 +216,7 @@ FOODS = tuple(
             family="볶음밥",
             cuisine="한식",
             meal_style="한 그릇",
+            staple_types=("rice",),
             description="밥과 재료를 고슬고슬하게 볶아 감칠맛을 살린 한 그릇 메뉴",
             attributes={
                 "spicy": 0.35,
@@ -249,6 +259,7 @@ FOODS = tuple(
             family="구이·볶음",
             cuisine="한식",
             meal_style="반찬 식사",
+            staple_types=("rice",),
             description="고기나 생선을 구우거나 볶아 밥과 곁들이는 단백질 중심 메뉴",
             attributes={
                 "spicy": 0.42,
@@ -287,6 +298,7 @@ FOODS = tuple(
             family="냉면·국수",
             cuisine="한식",
             meal_style="면",
+            staple_types=("noodle",),
             description="면과 육수 또는 양념을 취향에 따라 즐기는 친숙한 한식 면 메뉴",
             attributes={
                 "spicy": 0.3,
@@ -325,6 +337,19 @@ FOODS = tuple(
             family="분식",
             cuisine="한식",
             meal_style="간편식",
+            staple_overrides={
+                "라볶이": ("noodle",),
+                "김밥": ("rice",),
+                "참치김밥": ("rice",),
+                "치즈김밥": ("rice",),
+                "돈가스김밥": ("rice",),
+                "충무김밥": ("rice",),
+                "유부초밥": ("rice",),
+                "쫄면": ("noodle",),
+                "라면": ("noodle",),
+                "떡라면": ("noodle",),
+                "만두라면": ("noodle",),
+            },
             description="익숙한 양념과 탄수화물로 빠르게 만족감을 주는 분식 메뉴",
             attributes={
                 "spicy": 0.5,
@@ -357,6 +382,7 @@ FOODS = tuple(
             family="일식 덮밥·돈가스",
             cuisine="일식",
             meal_style="한 그릇",
+            staple_types=("rice",),
             description="튀김이나 고기, 생선을 밥과 함께 푸짐하게 즐기는 일식 메뉴",
             attributes={
                 "spicy": 0.12,
@@ -385,6 +411,7 @@ FOODS = tuple(
             family="우동·소바",
             cuisine="일식",
             meal_style="면",
+            staple_types=("noodle",),
             description="깔끔한 육수나 소스에 굵은 면 또는 메밀면을 곁들인 일식 면 메뉴",
             attributes={
                 "spicy": 0.12,
@@ -417,6 +444,20 @@ FOODS = tuple(
             family="라멘·일본요리",
             cuisine="일식",
             meal_style="면·정식",
+            staple_overrides={
+                "돈코츠라멘": ("noodle",),
+                "미소라멘": ("noodle",),
+                "쇼유라멘": ("noodle",),
+                "시오라멘": ("noodle",),
+                "탄탄멘": ("noodle",),
+                "츠케멘": ("noodle",),
+                "야키소바": ("noodle",),
+                "초밥정식": ("rice",),
+                "모둠초밥": ("rice",),
+                "연어초밥": ("rice",),
+                "참치초밥": ("rice",),
+                "회전초밥": ("rice",),
+            },
             description="진한 육수의 면 또는 해산물과 밥을 조합한 인기 일식 메뉴",
             attributes={
                 "spicy": 0.28,
@@ -447,6 +488,7 @@ FOODS = tuple(
             family="중화면",
             cuisine="중식",
             meal_style="면",
+            staple_types=("noodle",),
             description="불맛과 진한 소스 또는 육수를 살린 중식 면 메뉴",
             attributes={
                 "spicy": 0.48,
@@ -484,6 +526,17 @@ FOODS = tuple(
             family="중화밥·요리",
             cuisine="중식",
             meal_style="한 그릇·요리",
+            staple_overrides={
+                "중화비빔밥": ("rice",),
+                "마파두부덮밥": ("rice",),
+                "잡채밥": ("rice",),
+                "중식볶음밥": ("rice",),
+                "게살볶음밥": ("rice",),
+                "유산슬밥": ("rice",),
+                "고추잡채밥": ("rice",),
+                "고추잡채": ("bread",),
+                "마라탕": ("noodle",),
+            },
             description="강한 불맛과 향신료, 다채로운 식감을 밥과 함께 즐기는 중식 메뉴",
             attributes={
                 "spicy": 0.58,
@@ -512,6 +565,17 @@ FOODS = tuple(
             family="베트남 요리",
             cuisine="베트남식",
             meal_style="면·한 그릇",
+            staple_overrides={
+                "소고기쌀국수": ("noodle",),
+                "닭고기쌀국수": ("noodle",),
+                "매운쌀국수": ("noodle",),
+                "분짜": ("noodle",),
+                "분보후에": ("noodle",),
+                "반미": ("bread",),
+                "껌승": ("rice",),
+                "베트남볶음밥": ("rice",),
+                "쌀국수": ("noodle",),
+            },
             description="향긋한 허브와 산뜻한 소스로 가볍게 즐기는 베트남식 메뉴",
             attributes={
                 "spicy": 0.32,
@@ -540,6 +604,17 @@ FOODS = tuple(
             family="태국 요리",
             cuisine="태국식",
             meal_style="면·한 그릇",
+            staple_overrides={
+                "팟타이": ("noodle",),
+                "팟씨유": ("noodle",),
+                "똠얌쌀국수": ("noodle",),
+                "카오팟": ("rice",),
+                "카오만가이": ("rice",),
+                "푸팟퐁커리": ("rice",),
+                "그린커리": ("rice",),
+                "레드커리": ("rice",),
+                "팟카파오무쌉": ("rice",),
+            },
             description="매콤하고 새콤한 향신료와 허브 풍미가 선명한 태국식 메뉴",
             attributes={
                 "spicy": 0.62,
@@ -568,6 +643,12 @@ FOODS = tuple(
             family="동남아 요리",
             cuisine="동남아식",
             meal_style="한 그릇",
+            staple_types=("rice",),
+            staple_overrides={
+                "미고렝": ("noodle",),
+                "락사": ("noodle",),
+                "칠리크랩": (),
+            },
             description="향신료와 달콤짭짤한 소스를 밥 또는 면과 조합한 동남아식 메뉴",
             attributes={
                 "spicy": 0.48,
@@ -597,6 +678,12 @@ FOODS = tuple(
             family="파스타·리소토",
             cuisine="이탈리아식",
             meal_style="면·한 그릇",
+            staple_types=("noodle",),
+            staple_overrides={
+                "버섯리소토": ("rice",),
+                "해산물리소토": ("rice",),
+                "토마토리소토": ("rice",),
+            },
             description="소스의 풍미를 면이나 쌀에 진하게 입힌 이탈리아식 메뉴",
             attributes={
                 "spicy": 0.12,
@@ -622,6 +709,7 @@ FOODS = tuple(
             family="피자",
             cuisine="이탈리아식",
             meal_style="공유 식사",
+            staple_types=("bread",),
             description="구운 도우에 치즈와 토핑을 올린 익숙하고 든든한 메뉴",
             attributes={
                 "spicy": 0.1,
@@ -680,6 +768,8 @@ FOODS = tuple(
             family="버거·샌드위치",
             cuisine="서양식",
             meal_style="간편식",
+            staple_types=("bread",),
+            staple_overrides={"오믈렛": (), "브런치플레이트": ()},
             description="빵과 속재료를 조합해 간편하지만 든든하게 먹는 서양식 메뉴",
             attributes={
                 "spicy": 0.08,
@@ -718,6 +808,17 @@ FOODS = tuple(
             family="포케·샐러드",
             cuisine="퓨전",
             meal_style="가벼운 한 그릇",
+            staple_overrides={
+                "연어포케": ("rice",),
+                "참치포케": ("rice",),
+                "두부포케": ("rice",),
+                "닭가슴살포케": ("rice",),
+                "샐러드파스타": ("noodle",),
+                "메밀샐러드": ("noodle",),
+                "랩샌드위치": ("bread",),
+                "치킨랩": ("bread",),
+                "부리토볼": ("rice",),
+            },
             description="채소와 단백질을 산뜻하게 조합해 부담을 줄인 가벼운 메뉴",
             attributes={
                 "spicy": 0.08,
@@ -746,6 +847,11 @@ FOODS = tuple(
             family="인도 요리",
             cuisine="인도식",
             meal_style="커리·한 그릇",
+            staple_types=("rice",),
+            staple_overrides={
+                "탄두리치킨": (),
+                "난과커리세트": ("bread",),
+            },
             description="여러 향신료를 층층이 쌓아 밥이나 난과 함께 먹는 인도식 메뉴",
             attributes={
                 "spicy": 0.58,
@@ -773,6 +879,17 @@ FOODS = tuple(
             family="중동 요리",
             cuisine="중동식",
             meal_style="플레이트",
+            staple_overrides={
+                "케밥플레이트": ("rice", "bread"),
+                "치킨샤와르마": ("bread",),
+                "팔라펠플레이트": ("bread",),
+                "후무스플레이트": ("bread",),
+                "샥슈카": ("bread",),
+                "램케밥": ("rice", "bread"),
+                "치킨케밥": ("rice", "bread"),
+                "피타샌드위치": ("bread",),
+                "터키식필라프": ("rice",),
+            },
             description="향신료를 입힌 고기나 콩 요리를 빵과 채소에 곁들이는 메뉴",
             attributes={
                 "spicy": 0.28,
@@ -802,6 +919,17 @@ FOODS = tuple(
             family="멕시칸",
             cuisine="멕시코식",
             meal_style="한 그릇·간편식",
+            staple_overrides={
+                "비프타코": ("bread",),
+                "치킨타코": ("bread",),
+                "피쉬타코": ("bread",),
+                "부리토": ("rice", "bread"),
+                "퀘사디아": ("bread",),
+                "엔칠라다": ("bread",),
+                "비프파히타": ("bread",),
+                "치킨파히타": ("bread",),
+                "멕시칸라이스볼": ("rice",),
+            },
             description="또르띠야와 고기, 콩, 살사를 풍성하게 조합한 멕시코식 메뉴",
             attributes={
                 "spicy": 0.52,

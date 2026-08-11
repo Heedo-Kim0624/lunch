@@ -3,7 +3,8 @@
 ## Durable project knowledge
 
 - The product is a personalized decision engine presented as a single lever, not a random menu picker.
-- The active policy is `rules-v2`: content attributes, recent-event decay, context adjustments, repetition penalties, tie rotation, family-round-robin pooling, and bounded softmax exploration.
+- The active policy is `rules-v3`: explicit multi-group hard filters, content attributes, recent-event decay, context adjustments, repetition penalties, tie rotation, family-round-robin pooling, and bounded softmax exploration.
+- User filters use OR within a group and AND across non-empty groups; an empty group is unrestricted. Staple membership is explicit data, not a food-name substring guess.
 - Every recommendation stores the policy version, candidate count, scored top-candidate snapshot, chosen exposure, score breakdown, and selection probability.
 - Only observed user actions become learning signals; a reroll is weak negative evidence and non-exposed foods are never inferred as disliked.
 - SQLite is the zero-setup default. PostgreSQL is an optional parity path, not an MVP dependency.

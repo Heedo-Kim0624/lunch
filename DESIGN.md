@@ -37,13 +37,13 @@
 
 ## Scope
 
-- In scope: Nuxt UI, Django API, local and Neon persistence, seed foods, explainable rules recommendation, account authentication, event logging, tests, and Vercel deployment.
+- In scope: Nuxt UI, Django API, local and Neon persistence, seed foods, explainable rules recommendation, user-selected hard filters, account authentication, event logging, tests, and Vercel deployment.
 - Out of scope: GNN, pgvector, restaurant availability, payment, email verification, and social login.
 
 ## Architecture / Workflow
 
 - Main components: Nuxt client, Django REST API, authentication, recommendation service, Django ORM database.
-- Data flow: optional account session -> lever -> recommendation request -> scored candidate -> exposure -> explicit feedback event.
+- Data flow: optional account session -> optional multi-filter dialog -> lever -> filtered recommendation request -> scored candidate -> exposure -> explicit feedback event.
 - External systems: npm and Python package registries during setup, GitHub, Vercel, and Neon for production.
 - Files or modules likely touched: `frontend/`, `backend/`, `scripts/`, project docs and quality gates.
 

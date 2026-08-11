@@ -3,13 +3,13 @@
 ## Product and data
 
 - A reroll can mean dislike, unavailability, cost, distance, or mood. It therefore has only a weak negative weight.
-- Seed-food attributes are editorial estimates, not nutritional or restaurant-availability facts.
+- Seed-food attributes and rice/bread/noodle memberships are editorial estimates, not nutritional or restaurant-availability facts.
 - Anonymous local identity does not synchronize; signed-in history does.
 - Initial data is too sparse to justify collaborative filtering, GNNs, or claims of strong personalization.
 
 ## Engineering
 
-- SQLite is verified; the live Neon PostgreSQL runtime path still needs production verification.
+- SQLite and the live Neon PostgreSQL runtime are verified; the optional Docker Desktop PostgreSQL development path is not.
 - Automated browser E2E coverage is not configured yet.
 - The browser token is stored in local storage and is exposed if an XSS flaw is introduced.
 - Throttling uses Django's default per-instance cache and is only a basic abuse barrier on serverless instances.
