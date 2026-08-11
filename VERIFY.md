@@ -2,7 +2,7 @@
 
 ## Result
 
-State: **PASS** for the local SQLite-backed account and recommendation application. Live external deployment is pending.
+State: **PASS** for local SQLite and live Vercel + Neon production.
 
 ## Automated checks
 
@@ -41,14 +41,18 @@ State: **PASS** for the local SQLite-backed account and recommendation applicati
 - [x] Signup validation, visible labels, field errors, loading state, and a single primary submit action are implemented.
 - [x] Production configuration rejects the local secret and non-persistent Vercel SQLite configuration.
 - [x] GitHub Actions reproduces the backend and frontend quality gates without secrets.
+- [x] Neon Production migrations completed for content types, users, tokens, and recommendations.
+- [x] Production seed verified at 342 active foods.
+- [x] Vercel Django API health returned HTTP 200 at `https://lunch-api-mocha.vercel.app/api/v1/health`.
+- [x] Production signup page returned HTTP 200 and CORS returned the exact web origin.
+- [x] Disposable production account completed register, current-user lookup, recommendation, `ACCEPTED` feedback, logout (HTTP 204), and login again.
+- [x] Disposable user, token, recommendation session, exposure, and feedback were removed; follow-up counts were zero.
 
 ## Not yet verified
 
 - [ ] Live PostgreSQL migration/test path: Docker Desktop's Linux engine was not running.
 - [ ] Manual browser visual and keyboard pass: server process launch was blocked by the execution environment, so UI evidence is currently build-, type-, and unit-test-based.
 - [ ] Cross-browser and mobile-device behavior.
-- [ ] Live Neon migrations and seed.
-- [ ] Live Vercel API/UI signup, login, recommendation, feedback, and logout smoke test.
 
 ## Evidence
 

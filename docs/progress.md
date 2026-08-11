@@ -16,7 +16,7 @@
 
 ## Current state
 
-The local application now includes a second complete slice for email registration, login, logout, account-owned recommendation history, production-safe Django settings, GitHub Actions, and a Vercel + Neon deployment runbook. The full gate passes with 18 backend and 5 frontend tests. GitHub publication and live Vercel/Neon verification are the remaining external steps.
+The application is live on Vercel with a Neon free PostgreSQL database. The full local gate and GitHub Actions pass, and the disposable production account smoke test covered registration through repeat login.
 
 ## 2026-08-11 — Account and deployment slice
 
@@ -28,6 +28,10 @@ The local application now includes a second complete slice for email registratio
 - Kept machine-local AgentOS/JARVIS metadata out of the public repository.
 - Verified 18 backend tests, 5 frontend tests, Ruff, ESLint, Django checks, migration drift, TypeScript, and the Nuxt production build.
 - Fixed the first Linux CI run's platform-specific npm lockfile gap by making the required Emscripten runtime helpers explicit; clean-install validation now passes locally.
+- Published the public GitHub repository and passed both GitHub Actions jobs.
+- Provisioned Neon `lunch-db` in Singapore, applied all migrations, and verified 342 active foods.
+- Deployed the Django API to `lunch-api-mocha.vercel.app` and Nuxt web app to `lunch-web-ten.vercel.app`.
+- Verified production signup, CORS, current user, recommendation, feedback, logout, and repeat login, then removed all disposable smoke data.
 
 ## Known follow-ups
 

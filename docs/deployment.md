@@ -1,5 +1,12 @@
 # Free Production Deployment — GitHub + Vercel + Neon
 
+## Current production
+
+- Web: `https://lunch-web-ten.vercel.app`
+- API: `https://lunch-api-mocha.vercel.app`
+- API health: `https://lunch-api-mocha.vercel.app/api/v1/health`
+- Database: Neon free plan, Singapore region
+
 The repository is a monorepo deployed as two Vercel projects. The frontend project uses `frontend/` as its Root Directory; the API project uses `backend/`. Vercel detects Nuxt and Django from those directories, so no custom routing file is required.
 
 ## 1. Create the Neon database

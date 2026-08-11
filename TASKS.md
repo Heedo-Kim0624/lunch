@@ -14,7 +14,6 @@
 ## Active
 
 - [ ] Collect first-use feedback from local lunch decisions.
-- [ ] Connect Neon and both Vercel projects, then run the production smoke test.
 
 ## Done
 
@@ -35,3 +34,6 @@
 - [x] Add accessible signup, login, logout, and privacy pages.
 - [x] Add production-safe `DATABASE_URL`, Django security, CORS, and Vercel host configuration.
 - [x] Add GitHub Actions and the Vercel + Neon deployment runbook.
+- [x] Publish the public GitHub repository and pass GitHub Actions.
+- [x] Provision Neon, migrate and seed 342 production foods.
+- [x] Deploy the Vercel API and web projects and pass the disposable production account smoke test.

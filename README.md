@@ -4,6 +4,10 @@
 
 현재 버전은 Nuxt 4 UI, Django REST API, 이메일 회원가입·로그인, 342개 점심 메뉴, 음식군 다양성을 보장하는 규칙 기반 `rules-v2` 추천 정책, 계정별 이벤트 로그를 포함합니다. GNN과 pgvector는 데이터가 필요성을 증명할 때까지 포함하지 않습니다.
 
+- Live web: <https://lunch-web-ten.vercel.app>
+- Live API health: <https://lunch-api-mocha.vercel.app/api/v1/health>
+- GitHub: <https://github.com/Heedo-Kim0624/lunch>
+
 ## Stack
 
 - Frontend: Nuxt 4, Vue, TypeScript, Vitest, ESLint
