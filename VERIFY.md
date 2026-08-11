@@ -2,7 +2,7 @@
 
 ## Result
 
-State: **PASS** for local SQLite and live Vercel + Neon production.
+State: **PASS** for local SQLite and the `rules-v4` Vercel production deployment.
 
 ## Automated checks
 
@@ -14,12 +14,12 @@ State: **PASS** for local SQLite and live Vercel + Neon production.
   - Django system check: pass
   - Django migration drift check: pass (`No changes detected`)
   - Nuxt TypeScript check: pass
-  - Backend pytest: 43 passed
-  - Frontend Vitest: 8 passed
+  - Backend pytest: 57 passed
+  - Frontend Vitest: 10 passed
   - Nuxt production build: pass
 - [x] In-process Django client smoke test:
   - health: HTTP 200
-  - recommendation: HTTP 201, policy `rules-v3`
+  - recommendation: HTTP 201, policy `rules-v4`
   - feedback: HTTP 201, event `ACCEPTED`
   - temporary smoke-test records removed afterward
 - [x] `docker compose config --quiet`: pass.
@@ -29,6 +29,14 @@ State: **PASS** for local SQLite and live Vercel + Neon production.
 - [x] Recommendation events are linked to the exact exposure.
 - [x] Duplicate feedback is idempotent.
 - [x] Feedback ownership is checked against the anonymous or authenticated server-owned identity.
+- [x] Shared collaboration uses only authenticated `account-*` histories; anonymous device IDs personalize only themselves.
+- [x] Unauthenticated requests cannot submit the reserved `account-*` identity prefix, while authenticated requests replace all supplied IDs with the server-owned account identity.
+- [x] Five distinct accounts are required per food pair, repeated events do not inflate support, and public counts are lower-bound buckets rather than exact values.
+- [x] A 365-day source window, 90-day decay, cosine popularity correction, confidence shrinkage, and negative net histories are covered by tests.
+- [x] Explicitly disliked foods are removed before hybrid scoring and filtering can return the normal no-match recovery path.
+- [x] The public graph contains no identity field/value, stays within 48 nodes and 120 edges, and exposes content-only relationships before collaboration qualifies.
+- [x] `audit_recommendation_graph` passes locally with 0 account profiles, 0 qualified collaborative edges, 48 nodes, 65 content edges, and `identity_data_exposed=false`.
+- [x] A cold-cache local graph request returned HTTP 200 in 96.8 ms with two database queries; subsequent responses use a five-minute cache.
 - [x] Recommendation reasons are derived from actual score factors.
 - [x] Seed catalog contains exactly 1,000 unique menus, 1,000 unique item-specific descriptions, and all eight attributes bounded to 0–1.
 - [x] Individual profiles produce 918 distinct attribute combinations; cold scores identify 115 genuinely cold or chilled dishes.
@@ -66,11 +74,17 @@ State: **PASS** for local SQLite and live Vercel + Neon production.
 - [x] Disposable user, token, recommendation session, exposure, and feedback were removed; follow-up counts were zero.
 - [x] GitHub Actions run `31477492178` passed for commit `37f4adf` after the final seed optimization.
 - [x] Vercel production deployment `dpl_23NshkXgdvR2PezN4oFjZpyaotuP` reached Ready and the API health endpoint returned HTTP 200.
+- [x] GitHub Actions run `31479822210` passed both backend and frontend jobs for commit `8e927e9`.
+- [x] Vercel API deployment `dpl_DF3ZYjhM77SgcvSRKyKBJL7hntGE` and web deployment `dpl_BapD4ritM1wqzmQ88dzYuahvmgwD` reached Ready and retained the public aliases.
+- [x] Production graph audit found 45 eligible events from one account, no pair meeting the five-account privacy threshold, and therefore the expected `content_only` mode with 48 nodes, 65 edges, and no identity exposure.
+- [x] Live graph API returned `rules-v4`, 48 nodes, 65 edges, `minimum_shared_selectors=5`, `identity_data_exposed=false`, and no account or anonymous identity field/value.
+- [x] Live recommendation returned `rules-v4` with the collaborative score key; its temporary session and exposure were deleted afterward.
+- [x] Live `/graph` returned HTTP 200 with the graph title and markup, and Agent Browser loaded the public page with the title `음식 취향 지도 · 점심 결정 기계`.
 
 ## Not yet verified
 
 - [ ] Live PostgreSQL migration/test path: Docker Desktop's Linux engine was not running.
-- [ ] Manual browser visual and keyboard pass: local servers launched and API smoke passed, but the available browser-control runtime reported no browser backend; UI evidence remains build-, type-, and unit-test-based.
+- [ ] Full manual keyboard interaction and visual review across multiple viewport sizes.
 - [ ] Cross-browser and mobile-device behavior.
 
 ## Evidence

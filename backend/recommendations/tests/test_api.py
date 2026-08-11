@@ -61,7 +61,7 @@ def test_recommendation_creates_session_and_exposure(
     assert response.status_code == 201
     payload = response.json()
     assert payload["food"]["name"] in {food.canonical_name for food in foods}
-    assert payload["policy_version"] == "rules-v3"
+    assert payload["policy_version"] == "rules-v4"
     assert payload["reason"] == (
         "아직 선택 기록이 없어 인기와 메뉴 다양성을 기준으로 고른 첫 후보예요."
     )

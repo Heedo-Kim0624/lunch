@@ -163,7 +163,7 @@ def test_large_catalog_builds_a_diverse_auditable_candidate_pool() -> None:
     snapshot = exposure.session.candidate_snapshot
     family_counts = Counter(candidate["family"] for candidate in snapshot)
 
-    assert exposure.session.policy_version == "rules-v3"
+    assert exposure.session.policy_version == "rules-v4"
     assert exposure.session.candidate_count == len(FOODS)
     assert len(snapshot) == CANDIDATE_POOL_SIZE
     assert len(family_counts) == CANDIDATE_POOL_SIZE

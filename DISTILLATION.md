@@ -3,7 +3,9 @@
 ## Durable project knowledge
 
 - The product is a personalized decision engine presented as a single lever, not a random menu picker.
-- The active policy is `rules-v3`: explicit multi-group hard filters, content attributes, recent-event decay, context adjustments, repetition penalties, tie rotation, family-round-robin pooling, and bounded softmax exploration.
+- The active policy is `rules-v4`: explicit hard filters, content attributes, authenticated-account item-item collaboration, context adjustments, repetition penalties, family-round-robin pooling, and bounded softmax exploration.
+- Shared affinity requires five distinct authenticated accounts, uses a 365-day window with 90-day decay, corrects popularity through cosine normalization, and never trains from public anonymous IDs.
+- The public relationship graph contains food nodes only. Content edges work at cold start; collaborative edges appear only above the privacy threshold.
 - User filters use OR within a group and AND across non-empty groups; an empty group is unrestricted. Staple membership is explicit data, not a food-name substring guess.
 - Every recommendation stores the policy version, candidate count, scored top-candidate snapshot, chosen exposure, score breakdown, and selection probability.
 - Only observed user actions become learning signals; a reroll is weak negative evidence and non-exposed foods are never inferred as disliked.

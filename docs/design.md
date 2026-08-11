@@ -29,12 +29,16 @@ Only one primary action is emphasized in each state. Loading, success, and error
 - Reduced-motion users receive state changes without lever or ticket travel animation.
 - The filter dialog uses native checkboxes, traps keyboard focus, closes with Escape or the backdrop, and returns focus to its trigger.
 - Filter copy explains same-row OR, cross-row AND, and the unrestricted empty state before users apply selections.
+- The graph provides keyboard-focusable SVG food nodes, a visible selected-node inspector, semantic titles/descriptions, and a complete text-list alternative.
+- Relationship meaning is encoded by line weight and legend text as well as color; horizontal scrolling preserves legibility on small screens.
 
 ## Design-system Check
 
 Astryx XDS `Button` documentation was inspected. It requires accessible labels, recommends one primary action per view, action-specific copy, and loading feedback. The package examples are React-based, while this project is Nuxt/Vue, so the runtime package is intentionally not installed. These interaction principles are implemented with native Vue controls and project tokens.
 
 The account forms also follow the inspected XDS `TextInput` and `FormLayout` guidance: persistent visible labels, a vertical reading order, field-linked errors, autocomplete metadata, one primary submit action, and an explicit loading state.
+
+The graph keeps the established enamel monitor, paper inspector, and machine typography rather than adding an unrelated dashboard library. Astryx runtime remains intentionally absent because the project has a stronger Vue-native local system.
 
 ## Spec/Test/Code/Review/Ship Trace
 

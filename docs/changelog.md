@@ -10,3 +10,5 @@
 - Expanded the catalog to exactly 1,000 menus with unique descriptions, 71 families, 21 precise cuisine labels, and 918 distinct attribute profiles.
 - Added a fail-fast database catalog audit covering every curated field and all 72 full filter combinations.
 - Replaced per-row seeding with transaction-safe bulk create/update so the 1,000-row catalog can be promoted efficiently to remote PostgreSQL.
+- Added the `rules-v4` hybrid recommendation baseline with privacy-thresholded item-item collaborative filtering, popularity correction, and explicit dislike exclusion.
+- Added a cached public food relationship graph, accessible Nuxt visualization, and a reproducible privacy/source audit command.
