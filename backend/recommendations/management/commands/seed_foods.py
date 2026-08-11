@@ -15,6 +15,10 @@ class Command(BaseCommand):
         self._normalize_legacy_names()
         created = 0
         updated = 0
+        catalog_names = [str(item["canonical_name"]) for item in FOODS]
+        deactivated = Food.objects.filter(is_active=True).exclude(
+            canonical_name__in=catalog_names
+        ).update(is_active=False)
         for item in FOODS:
             _, was_created = Food.objects.update_or_create(
                 canonical_name=item["canonical_name"],
@@ -26,7 +30,8 @@ class Command(BaseCommand):
                 updated += 1
         self.stdout.write(
             self.style.SUCCESS(
-                f"Seeded foods: {created} created, {updated} updated, {len(FOODS)} total"
+                f"Seeded foods: {created} created, {updated} updated, "
+                f"{deactivated} deactivated, {len(FOODS)} total"
             )
         )
 

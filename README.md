@@ -2,7 +2,7 @@
 
 레버를 한 번 당기면 음식 하나를 제안하고, 수락과 재추천 행동을 다음 추천에 반영하는 개인화 점심 추천기입니다.
 
-현재 버전은 Nuxt 4 UI, Django REST API, 이메일 회원가입·로그인, 342개 점심 메뉴, 온도·종류·나라·맵기 다중 필터, 음식군 다양성을 보장하는 규칙 기반 `rules-v3` 추천 정책, 계정별 이벤트 로그를 포함합니다. GNN과 pgvector는 데이터가 필요성을 증명할 때까지 포함하지 않습니다.
+현재 버전은 Nuxt 4 UI, Django REST API, 이메일 회원가입·로그인, 1,000개 점심 메뉴, 온도·종류·나라·맵기 다중 필터, 음식군 다양성을 보장하는 규칙 기반 `rules-v3` 추천 정책, 계정별 이벤트 로그를 포함합니다. GNN과 pgvector는 데이터가 필요성을 증명할 때까지 포함하지 않습니다.
 
 - Live web: <https://lunch-web-ten.vercel.app>
 - Live API health: <https://lunch-api-mocha.vercel.app/api/v1/health>
@@ -54,6 +54,12 @@ powershell -ExecutionPolicy Bypass -File .\scripts\verify.ps1
 ```
 
 이 명령은 Django 시스템 검사, 백엔드·프런트엔드 린트, 단위/API 테스트, Nuxt 타입 검사와 프로덕션 빌드를 실행합니다.
+
+적재된 메뉴의 이름·설명·분류·속성과 72개 최세분 필터 조합은 다음 명령으로 다시 감사할 수 있습니다.
+
+```powershell
+uv run --directory backend python manage.py audit_foods
+```
 
 ## API
 

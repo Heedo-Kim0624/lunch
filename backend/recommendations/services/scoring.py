@@ -315,7 +315,7 @@ def create_recommendation(
             "staple_types": candidate.staple_types,
             "rank": rank,
             "total_score": round(candidate_score.total, 4),
-            "selection_probability": round(probability, 6),
+            "selection_probability": probability,
         }
         for rank, ((candidate, candidate_score), probability) in enumerate(
             zip(top_candidates, probabilities, strict=True),

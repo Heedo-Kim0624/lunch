@@ -159,7 +159,8 @@ The API rejects feedback when the anonymous ID does not own the exposure.
 
 ## Seed Catalog
 
-- `recommendations/seed_data.py` contains 342 unique menus across 23 food families and 12 cuisine labels.
+- `recommendations/seed_data.py` and `recommendations/expanded_catalog.py` contain exactly 1,000 unique menus across 71 food families and 21 precise cuisine labels.
 - Every menu carries all eight bounded recommendation attributes.
 - Every menu has a reviewed zero-or-more `rice`, `bread`, and `noodle` classification; multi-staple dishes may belong to more than one.
 - `seed_foods` updates existing rows transactionally and normalizes known legacy names without breaking referenced row IDs.
+- `audit_foods` compares every active database row with the curated source, checks description and attribute integrity, and executes the complete 72-case filter matrix.

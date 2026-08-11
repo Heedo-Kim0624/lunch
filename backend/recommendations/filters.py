@@ -18,8 +18,15 @@ SPICE_FILTERS = ("spicy", "mild")
 
 FILTER_KEYS = ("temperature", "staples", "cuisines", "spice")
 
-WESTERN_CUISINES = {"서양식", "이탈리아식"}
-SOUTHEAST_ASIAN_CUISINES = {"베트남식", "태국식", "동남아식"}
+WESTERN_CUISINES = {"서양식", "이탈리아식", "프랑스식", "스페인식"}
+SOUTHEAST_ASIAN_CUISINES = {
+    "베트남식",
+    "태국식",
+    "동남아식",
+    "인도네시아식",
+    "말레이시아식",
+    "필리핀식",
+}
 
 
 def _attribute(food: Food, name: str) -> float:

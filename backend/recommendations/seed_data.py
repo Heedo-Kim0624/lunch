@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Mapping
 
+from recommendations.expanded_catalog import ATTRIBUTE_NAMES as EXPANDED_ATTRIBUTE_NAMES
+from recommendations.expanded_catalog import EXPANDED_FOODS
 from recommendations.food_details import COLD_SCORES, FOOD_DETAILS
 
 ATTRIBUTE_NAMES = (
@@ -73,7 +75,7 @@ def _group(
     return foods
 
 
-FOODS = tuple(
+BASE_FOODS = tuple(
     [
         *_group(
             (
@@ -945,11 +947,22 @@ FOODS = tuple(
     ]
 )
 
+if ATTRIBUTE_NAMES != EXPANDED_ATTRIBUTE_NAMES:
+    raise ValueError("Base and expanded catalogs use different attribute schemas")
+
+FOODS = (*BASE_FOODS, *EXPANDED_FOODS)
+
 
 def validate_catalog() -> None:
     names = [str(item["canonical_name"]) for item in FOODS]
+    if len(names) != 1_000:
+        raise ValueError(f"Food seed catalog must contain exactly 1,000 menus: {len(names)}")
     if len(names) != len(set(names)):
         raise ValueError("Food seed catalog contains duplicate canonical names")
+
+    descriptions = [str(item["description"]) for item in FOODS]
+    if len(descriptions) != len(set(descriptions)):
+        raise ValueError("Food seed catalog contains duplicate descriptions")
 
     expected_attributes = set(ATTRIBUTE_NAMES)
     for item in FOODS:
@@ -962,6 +975,9 @@ def validate_catalog() -> None:
         )
         if has_invalid_value:
             raise ValueError(f"Invalid attribute value for {item['canonical_name']}")
+        staples = item["staple_types"]
+        if not isinstance(staples, list) or len(staples) != len(set(staples)):
+            raise ValueError(f"Invalid staple types for {item['canonical_name']}")
 
 
 validate_catalog()

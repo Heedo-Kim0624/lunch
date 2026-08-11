@@ -5,6 +5,8 @@ from random import Random
 import pytest
 from django.core.management import call_command
 
+from recommendations.expanded_catalog import EXPANDED_FOODS
+from recommendations.filters import cuisine_group
 from recommendations.food_details import COLD_SCORES, FOOD_DETAILS
 from recommendations.management.commands.seed_foods import ATTRIBUTE_NAMES, FOODS
 from recommendations.models import Food
@@ -20,19 +22,33 @@ def test_seed_catalog_has_large_unique_complete_menu_set() -> None:
         tuple(item["attributes"][name] for name in ATTRIBUTE_NAMES) for item in FOODS
     }
 
-    assert len(FOODS) >= 200
+    assert len(FOODS) == 1_000
+    assert len(EXPANDED_FOODS) == 658
     assert len(names) == len(set(names))
-    assert set(names) == set(FOOD_DETAILS)
+    assert set(FOOD_DETAILS) <= set(names)
     assert all(name == name.strip() and name for name in names)
     assert len(descriptions) == len(set(descriptions))
-    assert len(attribute_profiles) >= 280
+    assert len(attribute_profiles) >= 900
     assert set(COLD_SCORES) <= set(names)
+
+    assert Counter(cuisine_group(str(item["cuisine"])) for item in FOODS) == {
+        "korean": 350,
+        "japanese": 130,
+        "chinese": 120,
+        "western": 150,
+        "southeast_asian": 100,
+        "other": 150,
+    }
+    assert all(
+        str(item["canonical_name"]) in str(item["description"])
+        for item in EXPANDED_FOODS
+    )
 
     staple_counts = Counter(
         staple for item in FOODS for staple in item["staple_types"]
     )
     assert set(staple_counts) == STAPLE_TYPES
-    assert all(staple_counts[staple] >= 30 for staple in STAPLE_TYPES)
+    assert staple_counts == {"rice": 531, "bread": 122, "noodle": 196}
 
     for item in FOODS:
         assert item["family"]
@@ -44,7 +60,10 @@ def test_seed_catalog_has_large_unique_complete_menu_set() -> None:
         assert len(item["staple_types"]) == len(set(item["staple_types"]))
         assert set(item["attributes"]) == set(ATTRIBUTE_NAMES)
         assert all(0.0 <= value <= 1.0 for value in item["attributes"].values())
-        assert item["attributes"]["cold"] == COLD_SCORES.get(item["canonical_name"], 0.0)
+        if item["canonical_name"] in FOOD_DETAILS:
+            assert item["attributes"]["cold"] == COLD_SCORES.get(
+                item["canonical_name"], 0.0
+            )
 
 
 def test_individual_food_details_cover_known_edge_cases() -> None:
@@ -66,6 +85,15 @@ def test_individual_food_details_cover_known_edge_cases() -> None:
     assert by_name["쌀국수"]["staple_types"] == ["noodle"]
     assert set(by_name["부리토"]["staple_types"]) == {"rice", "bread"}
     assert by_name["스테이크"]["staple_types"] == []
+    assert by_name["프렌치어니언수프"]["attributes"]["broth"] >= 0.75
+    assert by_name["마라롱샤"]["attributes"]["spicy"] >= 0.85
+    assert by_name["페루식세비체"]["attributes"]["cold"] >= 0.75
+    assert by_name["연어아보카도포케"]["attributes"]["cold"] >= 0.75
+    assert by_name["연어아보카도포케"]["attributes"]["light"] >= 0.7
+    assert by_name["치킨아도보"]["attributes"]["spicy"] < 0.5
+    assert by_name["우육탕면"]["attributes"]["broth"] >= 0.75
+    assert by_name["키토김밥"]["staple_types"] == []
+    assert set(by_name["이집트코샤리"]["staple_types"]) == {"rice", "noodle"}
 
 
 @pytest.mark.django_db
@@ -100,6 +128,34 @@ def test_seed_command_normalizes_legacy_menu_name_without_losing_row() -> None:
 
 
 @pytest.mark.django_db
+def test_seed_command_deactivates_rows_outside_the_curated_catalog() -> None:
+    stray = Food.objects.create(
+        canonical_name="검수되지 않은 임시 메뉴",
+        family="임시",
+        attributes={},
+    )
+
+    call_command("seed_foods", stdout=StringIO())
+
+    stray.refresh_from_db()
+    assert not stray.is_active
+
+
+@pytest.mark.django_db
+def test_catalog_audit_command_passes_after_seed() -> None:
+    call_command("seed_foods", stdout=StringIO())
+    output = StringIO()
+
+    call_command("audit_foods", stdout=output)
+
+    report = output.getvalue()
+    assert "Catalog audit passed" in report
+    assert "active=1000" in report
+    assert "full_filter_combinations=72, nonempty=41, empty=31" in report
+    assert Food.objects.filter(is_active=True, is_lunch_suitable=True).count() == 1_000
+
+
+@pytest.mark.django_db
 def test_large_catalog_builds_a_diverse_auditable_candidate_pool() -> None:
     call_command("seed_foods", stdout=StringIO())
 
@@ -110,7 +166,7 @@ def test_large_catalog_builds_a_diverse_auditable_candidate_pool() -> None:
     assert exposure.session.policy_version == "rules-v3"
     assert exposure.session.candidate_count == len(FOODS)
     assert len(snapshot) == CANDIDATE_POOL_SIZE
-    assert len(family_counts) == len({item["family"] for item in FOODS})
-    assert max(family_counts.values()) <= 2
+    assert len(family_counts) == CANDIDATE_POOL_SIZE
+    assert max(family_counts.values()) == 1
     assert sum(item["selection_probability"] for item in snapshot) == pytest.approx(1)
     assert all(item["food_name"] and item["cuisine"] for item in snapshot)

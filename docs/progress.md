@@ -41,6 +41,16 @@ The application is live on Vercel with a Neon free PostgreSQL database. The full
 - Add email verification, password reset, account deletion, and an operator contact before inviting real users.
 - Replace the local-storage API token with an HttpOnly secure-cookie flow before a broader public launch.
 
+## 2026-08-11 — 1,000-menu catalog expansion
+
+- Added 658 individually named lunch menus while retaining the original 342 reviewed rows, producing exactly 1,000 active catalog entries.
+- Rebalanced the six user-facing cuisine groups to Korean 350, Chinese 120, Western 150, Japanese 130, Southeast Asian 100, and Other 150.
+- Verified 1,000 unique descriptions, 71 food families, 21 precise cuisine labels, 918 distinct eight-attribute profiles, 115 cold dishes, and 233 spicy dishes.
+- Verified staple memberships of rice 531, bread 122, and noodle 196; menus may have multiple staples or none.
+- Added a database audit command that detects missing, extra, or drifted rows and runs all 72 full temperature/staple/cuisine/spice filter combinations.
+- Confirmed 41 meaningful full combinations return candidates and 31 semantically empty combinations follow the explicit no-match path.
+- Verified idempotent local seeding with `0 created, 1000 updated, 0 deactivated` on the second run.
+
 ## 2026-08-11 — Per-food catalog quality pass
 
 - Replaced 23 repeated family descriptions with 342 unique, item-specific food descriptions.

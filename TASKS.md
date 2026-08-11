@@ -23,7 +23,7 @@
 - [x] Create the Django 5.2 API and versioned recommendation policy.
 - [x] Persist recommendation sessions, exposures, candidate snapshots, and feedback events.
 - [x] Add repeatable food seeding and SQLite-first local setup.
-- [x] Expand the seed catalog to 342 unique, fully attributed menus.
+- [x] Expand the seed catalog to 1,000 unique, fully attributed menus.
 - [x] Add family-round-robin candidate pooling so the large catalog produces visible variety.
 - [x] Add optional PostgreSQL 17 development configuration.
 - [x] Add unit, API, lint, type, migration, and production build gates.
@@ -35,10 +35,11 @@
 - [x] Add production-safe `DATABASE_URL`, Django security, CORS, and Vercel host configuration.
 - [x] Add GitHub Actions and the Vercel + Neon deployment runbook.
 - [x] Publish the public GitHub repository and pass GitHub Actions.
-- [x] Provision Neon, migrate and seed 342 production foods.
+- [x] Provision Neon, migrate and seed the production food catalog.
 - [x] Deploy the Vercel API and web projects and pass the disposable production account smoke test.
-- [x] Replace repeated catalog copy with 342 item-specific descriptions and recalibrated recommendation attributes.
+- [x] Maintain 1,000 unique item-specific descriptions and recalibrated recommendation attributes.
 - [x] Add an honest cold-start recommendation reason and catalog-quality regression tests.
-- [x] Add reviewed rice, bread, and noodle memberships for all 342 menus.
+- [x] Add reviewed rice, bread, and noodle memberships for all 1,000 menus.
 - [x] Add tested same-group OR and cross-group AND recommendation filters.
 - [x] Add the accessible machine-label multi-select filter dialog and empty-result recovery.
+- [x] Audit the exact 1,000-row catalog and all 72 temperature/staple/cuisine/spice combinations.
