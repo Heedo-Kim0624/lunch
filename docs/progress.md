@@ -27,6 +27,7 @@ The local application now includes a second complete slice for email registratio
 - Added a two-project Vercel + Neon deployment guide and GitHub Actions verification.
 - Kept machine-local AgentOS/JARVIS metadata out of the public repository.
 - Verified 18 backend tests, 5 frontend tests, Ruff, ESLint, Django checks, migration drift, TypeScript, and the Nuxt production build.
+- Fixed the first Linux CI run's platform-specific npm lockfile gap by making the required Emscripten runtime helpers explicit; clean-install validation now passes locally.
 
 ## Known follow-ups
 

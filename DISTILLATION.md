@@ -23,6 +23,7 @@
 - When a live server cannot be launched by the environment, exercise the HTTP stack with the framework test client and record that browser validation is still pending.
 - Validate Docker engine availability before attempting the PostgreSQL setup path.
 - Include a migration-drift check in the normal type/check gate.
+- Validate `npm ci` from a clean Linux runner: a lockfile refreshed on Windows with existing modules can omit cross-platform optional WASM packages, so make required runtime helpers explicit when the package manager reports them missing.
 
 ## Evidence boundary
 
