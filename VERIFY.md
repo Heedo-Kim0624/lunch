@@ -75,6 +75,7 @@ State: **PASS** for local SQLite and the `rules-v4` Vercel production deployment
 - [x] GitHub Actions run `31477492178` passed for commit `37f4adf` after the final seed optimization.
 - [x] Vercel production deployment `dpl_23NshkXgdvR2PezN4oFjZpyaotuP` reached Ready and the API health endpoint returned HTTP 200.
 - [x] GitHub Actions run `31479822210` passed both backend and frontend jobs for commit `8e927e9`.
+- [x] PR #1 merged as `baf2645`; final `main` verification run `31480410515` passed both jobs.
 - [x] Vercel API deployment `dpl_DF3ZYjhM77SgcvSRKyKBJL7hntGE` and web deployment `dpl_BapD4ritM1wqzmQ88dzYuahvmgwD` reached Ready and retained the public aliases.
 - [x] Production graph audit found 45 eligible events from one account, no pair meeting the five-account privacy threshold, and therefore the expected `content_only` mode with 48 nodes, 65 edges, and no identity exposure.
 - [x] Live graph API returned `rules-v4`, 48 nodes, 65 edges, `minimum_shared_selectors=5`, `identity_data_exposed=false`, and no account or anonymous identity field/value.
