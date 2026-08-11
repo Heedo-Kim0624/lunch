@@ -64,6 +64,11 @@ The application is live on Vercel with a Neon free PostgreSQL database. The full
 - Added a cached `GET /api/v1/recommendation-graph` response with up to 48 food nodes and 120 content, collaborative, or hybrid edges without any identity fields or exact selector counts.
 - Added a keyboard-accessible `/graph` visualization, text alternative, node inspector, relationship legend, responsive layout, and reduced-motion compatibility using the existing local machine design system.
 - Added a reproducible graph audit covering source window, payload bounds, support threshold, similarity bounds, and identity non-disclosure.
+- Passed the full local gate with 57 backend tests, 10 frontend tests, lint, type checking, migration drift checking, and the Nuxt production build.
+- Passed GitHub Actions run `31479822210` for commit `8e927e9` and published draft PR #1.
+- Deployed `rules-v4` to the Vercel API and the food graph to the Vercel web application.
+- Verified the Neon graph audit with 45 eligible events from one account; collaborative edges correctly remain disabled until five distinct authenticated accounts overlap.
+- Verified the public graph and recommendation contracts, health endpoint, browser page load, and cleanup of the temporary production smoke session.
 
 ## 2026-08-11 — Per-food catalog quality pass
 

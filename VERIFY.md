@@ -2,7 +2,7 @@
 
 ## Result
 
-State: **PASS** for local SQLite. The `rules-v4` Vercel production promotion is pending.
+State: **PASS** for local SQLite and the `rules-v4` Vercel production deployment.
 
 ## Automated checks
 
@@ -74,12 +74,17 @@ State: **PASS** for local SQLite. The `rules-v4` Vercel production promotion is 
 - [x] Disposable user, token, recommendation session, exposure, and feedback were removed; follow-up counts were zero.
 - [x] GitHub Actions run `31477492178` passed for commit `37f4adf` after the final seed optimization.
 - [x] Vercel production deployment `dpl_23NshkXgdvR2PezN4oFjZpyaotuP` reached Ready and the API health endpoint returned HTTP 200.
+- [x] GitHub Actions run `31479822210` passed both backend and frontend jobs for commit `8e927e9`.
+- [x] Vercel API deployment `dpl_DF3ZYjhM77SgcvSRKyKBJL7hntGE` and web deployment `dpl_BapD4ritM1wqzmQ88dzYuahvmgwD` reached Ready and retained the public aliases.
+- [x] Production graph audit found 45 eligible events from one account, no pair meeting the five-account privacy threshold, and therefore the expected `content_only` mode with 48 nodes, 65 edges, and no identity exposure.
+- [x] Live graph API returned `rules-v4`, 48 nodes, 65 edges, `minimum_shared_selectors=5`, `identity_data_exposed=false`, and no account or anonymous identity field/value.
+- [x] Live recommendation returned `rules-v4` with the collaborative score key; its temporary session and exposure were deleted afterward.
+- [x] Live `/graph` returned HTTP 200 with the graph title and markup, and Agent Browser loaded the public page with the title `음식 취향 지도 · 점심 결정 기계`.
 
 ## Not yet verified
 
-- [ ] Deploy the `rules-v4` API and graph UI, run the Neon graph audit, and smoke-test the live graph and hybrid score contract.
 - [ ] Live PostgreSQL migration/test path: Docker Desktop's Linux engine was not running.
-- [ ] Manual browser visual and keyboard pass: local servers launched and API smoke passed, but the available browser-control runtime reported no browser backend; UI evidence remains build-, type-, and unit-test-based.
+- [ ] Full manual keyboard interaction and visual review across multiple viewport sizes.
 - [ ] Cross-browser and mobile-device behavior.
 
 ## Evidence
