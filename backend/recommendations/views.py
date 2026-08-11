@@ -1,24 +1,39 @@
 from django.http import Http404
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from recommendations.models import Food, RecommendationExposure, UserFoodEvent
 from recommendations.serializers import FeedbackRequestSerializer, RecommendationRequestSerializer
+from recommendations.services.collaborative import (
+    AUTHENTICATED_IDENTITY_PREFIX,
+    invalidate_collaborative_cache,
+)
+from recommendations.services.graph import get_recommendation_graph
 from recommendations.services.scoring import NoMatchingFoodsError, create_recommendation
 
 
 def request_identity(request: Request, anonymous_id: str) -> str:
     user = getattr(request, "user", None)
     if user is not None and user.is_authenticated:
-        return f"account-{user.id}"
+        return f"{AUTHENTICATED_IDENTITY_PREFIX}{user.id}"
+    if anonymous_id.startswith(AUTHENTICATED_IDENTITY_PREFIX):
+        raise ValidationError(
+            {"anonymous_id": ["This identifier prefix is reserved for authenticated accounts."]}
+        )
     return anonymous_id
 
 
 class HealthView(APIView):
     def get(self, request: Request) -> Response:
         return Response({"status": "ok"})
+
+
+class RecommendationGraphView(APIView):
+    def get(self, request: Request) -> Response:
+        return Response(get_recommendation_graph())
 
 
 class RecommendationCreateView(APIView):
@@ -85,6 +100,8 @@ class RecommendationFeedbackView(APIView):
             event_type=serializer.validated_data["event_type"],
             defaults={"context": exposure.session.context},
         )
+        if created and anonymous_id.startswith(AUTHENTICATED_IDENTITY_PREFIX):
+            invalidate_collaborative_cache()
         return Response(
             {"event_id": event.id, "event_type": event.event_type},
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,

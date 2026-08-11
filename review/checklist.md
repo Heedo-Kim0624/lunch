@@ -13,6 +13,8 @@
 - [x] Production settings require a persistent database, secret key, HTTPS, and explicit CORS origin.
 - [x] GitHub Actions and a secret-free Vercel/Neon runbook are present.
 - [x] Multi-select filters have explicit OR/AND semantics, validation, no-match recovery, and keyboard-accessible dialog controls.
+- [x] Collaborative affinity enforces authenticated sources, five-user support, deduplicated selectors, popularity correction, time decay, and explicit dislike exclusion.
+- [x] The public graph contains food-only aggregate data, applies payload limits, and has SVG keyboard navigation plus a text alternative.
 - [ ] Live PostgreSQL path verified with Docker Desktop running.
 - [ ] Manual browser and mobile usability reviewed.
 - [x] Live Neon and Vercel account/recommendation smoke test completed for the prior production slice.

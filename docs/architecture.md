@@ -5,13 +5,14 @@
 ```text
 Nuxt 4 web client
   ├─ register / login / account state
-  └─ multi-filter popup / lever / ticket / feedback
+  ├─ multi-filter popup / lever / ticket / feedback
+  └─ privacy-safe food relationship graph
           │ HTTP JSON
           ▼
 Django REST API
   ├─ token authentication
   ├─ recommendation orchestration
-  ├─ content + context scoring
+  ├─ content + collaborative + context scoring
   ├─ repetition penalty
   └─ softmax exploration
           │ Django ORM
@@ -39,6 +40,7 @@ docs/                     product, architecture, decisions, and progress
 active lunch foods
 → temperature + staple + cuisine + spice hard filters
 → preference score from decayed explicit events
+→ item-item collaborative score from 5+ verified accounts
 → weather/temperature context score
 → novelty and popularity
 → recent exact-food repetition penalty
@@ -49,7 +51,7 @@ active lunch foods
 → immutable session and exposure log
 ```
 
-The initial score is explainable and versioned. Weights are policy defaults, not learned truth.
+The `rules-v4` score is explainable and versioned: 45% personal attribute preference, 15% collaborative affinity, 15% context, 10% novelty, and 15% popularity before repetition penalties. With no qualified shared history, the collaborative term stays neutral.
 
 ## API Contracts
 
@@ -86,7 +88,7 @@ Authenticated recommendation and feedback requests use the account identity esta
 {
   "recommendation_id": 1,
   "session_id": "uuid",
-  "policy_version": "rules-v3",
+  "policy_version": "rules-v4",
   "food": {
     "id": 1,
     "name": "순두부찌개",
@@ -98,6 +100,7 @@ Authenticated recommendation and feedback requests use the account identity esta
   "reason": "비 오는 날에 잘 맞는 따뜻한 국물 메뉴예요.",
   "score_breakdown": {
     "preference": 0.5,
+    "collaborative": 0.5,
     "context": 0.8,
     "novelty": 1.0,
     "popularity": 0.8,
@@ -120,6 +123,10 @@ Authenticated recommendation and feedback requests use the account identity esta
 
 The API rejects feedback when the anonymous ID does not own the exposure.
 
+### Read the privacy-safe relationship graph
+
+`GET /api/v1/recommendation-graph` returns at most 48 food nodes and 120 aggregate edges. Content edges use the seven preference attributes. Collaborative edges require at least five distinct authenticated accounts, a 365-day window, 90-day half-life, cosine normalization, and confidence shrinkage. Selector counts are released only as lower-bound buckets (5, 10, 25, and so on), and the response contains no account or anonymous identity.
+
 ## Storage Decisions
 
 - SQLite is the zero-setup local default.
@@ -129,7 +136,7 @@ The API rejects feedback when the anonymous ID does not own the exposure.
 - Each session stores the 24-item diverse candidate snapshot and conditional selection probabilities for later policy evaluation.
 - A candidate snapshot includes food name, family, cuisine, staple types, rank, score, and probability so catalog behavior remains auditable.
 - Repeated delivery of the same feedback type for one exposure is idempotent.
-- Pairwise food similarities are not stored in the MVP.
+- Pairwise similarities are calculated from current events and cached for five minutes; no graph database or identity-bearing graph table is stored.
 
 ## Frontend Decisions
 
@@ -147,6 +154,8 @@ The API rejects feedback when the anonymous ID does not own the exposure.
 - No precise location, contact-list, or payment data is collected.
 - CORS is limited to explicitly configured frontend origins.
 - Feedback ownership is checked against the recommendation exposure.
+- Cross-user collaboration accepts only `account-*` identities created by server-authenticated requests; public device IDs never train other users' recommendations.
+- Public graph edges suppress collaborative support below five distinct accounts and never serialize identities.
 - Production requires a non-default secret, HTTPS redirect, secure cookies, HSTS, and a persistent `DATABASE_URL`.
 
 ## Growth Path
@@ -154,8 +163,9 @@ The API rejects feedback when the anonymous ID does not own the exposure.
 1. Add dietary/allergen and availability hard filters.
 2. Replace hand weights with a small calibrated ranker or contextual bandit.
 3. Add PostgreSQL-backed aggregate features.
-4. Evaluate collaborative filtering only after multi-user overlap exists.
-5. Evaluate graph embeddings through an ablation against simpler baselines.
+4. Measure the item-item collaborative baseline against content-only sessions.
+5. Precompute affinities only when the 365-day event scan becomes a measured latency bottleneck.
+6. Evaluate graph embeddings through an ablation against the current hybrid baseline.
 
 ## Seed Catalog
 

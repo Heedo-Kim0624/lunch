@@ -2,9 +2,10 @@
 
 레버를 한 번 당기면 음식 하나를 제안하고, 수락과 재추천 행동을 다음 추천에 반영하는 개인화 점심 추천기입니다.
 
-현재 버전은 Nuxt 4 UI, Django REST API, 이메일 회원가입·로그인, 1,000개 점심 메뉴, 온도·종류·나라·맵기 다중 필터, 음식군 다양성을 보장하는 규칙 기반 `rules-v3` 추천 정책, 계정별 이벤트 로그를 포함합니다. GNN과 pgvector는 데이터가 필요성을 증명할 때까지 포함하지 않습니다.
+현재 버전은 Nuxt 4 UI, Django REST API, 이메일 회원가입·로그인, 1,000개 점심 메뉴, 다중 필터, 음식 특성과 로그인 사용자의 집계 선택 관계를 혼합하는 `rules-v4` 추천 정책, 개인정보를 노출하지 않는 음식 취향 지도를 포함합니다. GNN과 pgvector는 데이터가 필요성을 증명할 때까지 포함하지 않습니다.
 
 - Live web: <https://lunch-web-ten.vercel.app>
+- Live taste graph: <https://lunch-web-ten.vercel.app/graph>
 - Live API health: <https://lunch-api-mocha.vercel.app/api/v1/health>
 - GitHub: <https://github.com/Heedo-Kim0624/lunch>
 
@@ -59,12 +60,14 @@ powershell -ExecutionPolicy Bypass -File .\scripts\verify.ps1
 
 ```powershell
 uv run --directory backend python manage.py audit_foods
+uv run --directory backend python manage.py audit_recommendation_graph
 ```
 
 ## API
 
 ```text
 GET  /api/v1/health
+GET  /api/v1/recommendation-graph
 POST /api/v1/auth/register
 POST /api/v1/auth/login
 GET  /api/v1/auth/me
@@ -76,6 +79,8 @@ POST /api/v1/recommendations/{recommendation_id}/feedback
 로그인 요청은 `Authorization: Token <token>` 헤더를 사용합니다. 로그인 상태에서는 추천과 피드백이 서버가 확인한 계정 ID에 귀속되고, 비로그인 상태에서는 기기 로컬 ID를 사용합니다.
 
 추천 요청의 필터는 같은 그룹 안에서 OR, 서로 다른 그룹 사이에서 AND로 계산합니다. 빈 그룹은 제한하지 않으며, 요청 예시는 [아키텍처 문서](docs/architecture.md)에 있습니다.
+
+협업 추천은 서버가 확인한 로그인 계정의 최근 365일 행동만 공유 신호로 사용합니다. 한 음식 쌍을 긍정적으로 선택한 계정이 최소 5명일 때만 관계가 활성화되며, 익명 ID나 사용자별 선택 목록은 그래프 응답에 포함하지 않습니다.
 
 ## Free Deployment
 

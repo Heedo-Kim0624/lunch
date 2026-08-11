@@ -16,8 +16,12 @@ from recommendations.models import (
     RecommendationSession,
     UserFoodEvent,
 )
+from recommendations.services.collaborative import (
+    collaborative_candidate_scores,
+    get_collaborative_snapshot,
+)
 
-POLICY_VERSION = "rules-v3"
+POLICY_VERSION = "rules-v4"
 CANDIDATE_POOL_SIZE = 24
 MAX_FOODS_PER_FAMILY = 2
 SOFTMAX_TEMPERATURE = 0.18
@@ -47,6 +51,7 @@ class NoMatchingFoodsError(Exception):
 @dataclass(frozen=True)
 class ScoreBreakdown:
     preference: float
+    collaborative: float
     context: float
     novelty: float
     popularity: float
@@ -168,6 +173,8 @@ def score_food(
     context: dict[str, object],
     events: Sequence[UserFoodEvent],
     now: datetime,
+    *,
+    collaborative: float = 0.5,
 ) -> ScoreBreakdown:
     preference = _preference_score(food, events, now)
     context_score = _context_score(food, context)
@@ -177,13 +184,15 @@ def score_food(
     total = max(
         0.0,
         0.45 * preference
-        + 0.2 * context_score
-        + 0.15 * novelty
-        + 0.2 * popularity
+        + 0.15 * _clamp(collaborative)
+        + 0.15 * context_score
+        + 0.1 * novelty
+        + 0.15 * popularity
         - repetition_penalty,
     )
     return ScoreBreakdown(
         preference=preference,
+        collaborative=_clamp(collaborative),
         context=context_score,
         novelty=novelty,
         popularity=popularity,
@@ -251,6 +260,7 @@ def _recommendation_reason(
     *,
     has_history: bool,
     has_filters: bool = False,
+    has_collaborative_signal: bool = False,
 ) -> str:
     if not has_history:
         if has_filters:
@@ -269,6 +279,8 @@ def _recommendation_reason(
         return "더운 날 부담을 덜어 줄 시원한 메뉴예요."
     if score.preference >= 0.65:
         return "지금까지 남긴 선택과 비슷한 결을 가진 메뉴예요."
+    if has_collaborative_signal and score.collaborative >= 0.35:
+        return "비슷한 선택을 한 사람들이 함께 고른 메뉴예요."
     if score.novelty >= 0.9:
         if _attribute(food, "familiar") >= 0.65:
             return "최근 선택과 겹치지 않는 익숙한 점심 후보예요."
@@ -297,8 +309,39 @@ def create_recommendation(
         .select_related("food")
         .order_by("-event_time")[:100]
     )
+    disliked_food_ids = {
+        event.food_id
+        for event in history
+        if event.event_type == UserFoodEvent.EventType.DISLIKED
+    }
+    if disliked_food_ids:
+        foods = [food for food in foods if food.id not in disliked_food_ids]
+    if not foods:
+        raise NoMatchingFoodsError("All matching foods were explicitly disliked")
+
+    collaborative_scores = collaborative_candidate_scores(
+        history,
+        get_collaborative_snapshot(),
+        candidate_ids={food.id for food in foods},
+        now=now,
+    )
+    neutral_collaborative_score = 0.0 if collaborative_scores else 0.5
     random_source = rng or SystemRandom()
-    scored = [(food, score_food(food, context, history, now)) for food in foods]
+    scored = [
+        (
+            food,
+            score_food(
+                food,
+                context,
+                history,
+                now,
+                collaborative=collaborative_scores.get(
+                    food.id, neutral_collaborative_score
+                ),
+            ),
+        )
+        for food in foods
+    ]
     # Stable sorting after shuffling rotates equally scored foods within a family.
     random_source.shuffle(scored)
     scored.sort(key=lambda item: item[1].total, reverse=True)
@@ -347,5 +390,6 @@ def create_recommendation(
             score,
             has_history=bool(history),
             has_filters=bool(normalized_filters),
+            has_collaborative_signal=bool(collaborative_scores),
         ),
     )

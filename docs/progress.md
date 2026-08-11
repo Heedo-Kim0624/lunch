@@ -56,6 +56,15 @@ The application is live on Vercel with a Neon free PostgreSQL database. The full
 - Passed seven live matching filter requests across all six cuisine groups and OR/AND selection, plus the HTTP 400 `no_matching_foods` path.
 - Removed all temporary live-smoke sessions and exposures and confirmed zero matching records remained.
 
+## 2026-08-11 — Hybrid collaborative recommendation graph
+
+- Upgraded the recommendation policy to `rules-v4` with a 15% item-item collaborative term while keeping hard filters, attribute preference, context, novelty, popularity, repetition protection, and family diversity.
+- Limited shared learning to authenticated account events from the last 365 days and required five distinct co-selectors before activating an affinity.
+- Added 90-day event decay, per-user food aggregation, cosine popularity correction, confidence shrinkage, and hard exclusion of explicitly disliked foods.
+- Added a cached `GET /api/v1/recommendation-graph` response with up to 48 food nodes and 120 content, collaborative, or hybrid edges without any identity fields or exact selector counts.
+- Added a keyboard-accessible `/graph` visualization, text alternative, node inspector, relationship legend, responsive layout, and reduced-motion compatibility using the existing local machine design system.
+- Added a reproducible graph audit covering source window, payload bounds, support threshold, similarity bounds, and identity non-disclosure.
+
 ## 2026-08-11 — Per-food catalog quality pass
 
 - Replaced 23 repeated family descriptions with 342 unique, item-specific food descriptions.

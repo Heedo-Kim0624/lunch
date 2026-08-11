@@ -129,3 +129,24 @@ def test_authenticated_recommendation_uses_server_owned_identity(api_client: API
 
     assert response.status_code == 201
     assert RecommendationSession.objects.get().anonymous_id == f"account-{registered['user']['id']}"
+
+
+@pytest.mark.django_db
+def test_anonymous_recommendation_cannot_spoof_authenticated_identity_prefix(
+    api_client: APIClient,
+) -> None:
+    Food.objects.create(
+        canonical_name="비빔밥",
+        family="비빔밥·덮밥",
+        attributes={"popularity": 0.8},
+    )
+
+    response = api_client.post(
+        reverse("recommendation-create"),
+        {"anonymous_id": "account-999", "context": {}},
+        format="json",
+    )
+
+    assert response.status_code == 400
+    assert "anonymous_id" in response.json()
+    assert RecommendationSession.objects.count() == 0

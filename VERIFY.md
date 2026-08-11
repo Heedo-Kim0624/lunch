@@ -2,7 +2,7 @@
 
 ## Result
 
-State: **PASS** for local SQLite and live Vercel + Neon production.
+State: **PASS** for local SQLite. The `rules-v4` Vercel production promotion is pending.
 
 ## Automated checks
 
@@ -14,12 +14,12 @@ State: **PASS** for local SQLite and live Vercel + Neon production.
   - Django system check: pass
   - Django migration drift check: pass (`No changes detected`)
   - Nuxt TypeScript check: pass
-  - Backend pytest: 43 passed
-  - Frontend Vitest: 8 passed
+  - Backend pytest: 57 passed
+  - Frontend Vitest: 10 passed
   - Nuxt production build: pass
 - [x] In-process Django client smoke test:
   - health: HTTP 200
-  - recommendation: HTTP 201, policy `rules-v3`
+  - recommendation: HTTP 201, policy `rules-v4`
   - feedback: HTTP 201, event `ACCEPTED`
   - temporary smoke-test records removed afterward
 - [x] `docker compose config --quiet`: pass.
@@ -29,6 +29,14 @@ State: **PASS** for local SQLite and live Vercel + Neon production.
 - [x] Recommendation events are linked to the exact exposure.
 - [x] Duplicate feedback is idempotent.
 - [x] Feedback ownership is checked against the anonymous or authenticated server-owned identity.
+- [x] Shared collaboration uses only authenticated `account-*` histories; anonymous device IDs personalize only themselves.
+- [x] Unauthenticated requests cannot submit the reserved `account-*` identity prefix, while authenticated requests replace all supplied IDs with the server-owned account identity.
+- [x] Five distinct accounts are required per food pair, repeated events do not inflate support, and public counts are lower-bound buckets rather than exact values.
+- [x] A 365-day source window, 90-day decay, cosine popularity correction, confidence shrinkage, and negative net histories are covered by tests.
+- [x] Explicitly disliked foods are removed before hybrid scoring and filtering can return the normal no-match recovery path.
+- [x] The public graph contains no identity field/value, stays within 48 nodes and 120 edges, and exposes content-only relationships before collaboration qualifies.
+- [x] `audit_recommendation_graph` passes locally with 0 account profiles, 0 qualified collaborative edges, 48 nodes, 65 content edges, and `identity_data_exposed=false`.
+- [x] A cold-cache local graph request returned HTTP 200 in 96.8 ms with two database queries; subsequent responses use a five-minute cache.
 - [x] Recommendation reasons are derived from actual score factors.
 - [x] Seed catalog contains exactly 1,000 unique menus, 1,000 unique item-specific descriptions, and all eight attributes bounded to 0–1.
 - [x] Individual profiles produce 918 distinct attribute combinations; cold scores identify 115 genuinely cold or chilled dishes.
@@ -69,6 +77,7 @@ State: **PASS** for local SQLite and live Vercel + Neon production.
 
 ## Not yet verified
 
+- [ ] Deploy the `rules-v4` API and graph UI, run the Neon graph audit, and smoke-test the live graph and hybrid score contract.
 - [ ] Live PostgreSQL migration/test path: Docker Desktop's Linux engine was not running.
 - [ ] Manual browser visual and keyboard pass: local servers launched and API smoke passed, but the available browser-control runtime reported no browser backend; UI evidence remains build-, type-, and unit-test-based.
 - [ ] Cross-browser and mobile-device behavior.

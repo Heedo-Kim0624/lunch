@@ -21,6 +21,7 @@ async function handleLogout() {
       점심 결정 기계
     </NuxtLink>
     <div class="site-nav-actions">
+      <NuxtLink class="nav-link nav-graph-link" to="/graph">취향 지도</NuxtLink>
       <template v-if="user">
         <span class="account-name">{{ user.display_name }} 님</span>
         <button type="button" class="nav-button" :disabled="isLoggingOut" @click="handleLogout">

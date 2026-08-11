@@ -4,7 +4,8 @@ import pytest
 from django.utils import timezone
 
 from recommendations.models import Food, UserFoodEvent
-from recommendations.services.scoring import score_food
+from recommendations.services.collaborative import invalidate_collaborative_cache
+from recommendations.services.scoring import create_recommendation, score_food
 
 
 @pytest.mark.django_db
@@ -73,3 +74,82 @@ def test_explicit_positive_history_increases_matching_attribute_score() -> None:
     cold_start = score_food(spicy_food, {}, [], now)
 
     assert personalized.preference > cold_start.preference
+
+
+def test_collaborative_signal_increases_the_hybrid_score() -> None:
+    food = Food(
+        canonical_name="라면",
+        family="라면",
+        attributes={"popularity": 0.5},
+    )
+    now = timezone.now()
+
+    related = score_food(food, {}, [], now, collaborative=0.8)
+    unrelated = score_food(food, {}, [], now, collaborative=0.0)
+
+    assert related.collaborative == 0.8
+    assert related.total > unrelated.total
+
+
+@pytest.mark.django_db
+def test_disliked_food_is_removed_before_recommendation() -> None:
+    disliked = Food.objects.create(
+        canonical_name="싫어하는 메뉴",
+        family="싫어요",
+        attributes={"popularity": 1.0},
+    )
+    allowed = Food.objects.create(
+        canonical_name="먹을 수 있는 메뉴",
+        family="허용",
+        attributes={"popularity": 0.1},
+    )
+    UserFoodEvent.objects.create(
+        anonymous_id="device-a",
+        food=disliked,
+        event_type=UserFoodEvent.EventType.DISLIKED,
+    )
+
+    exposure = create_recommendation("device-a", {})
+
+    assert exposure.food_id == allowed.id
+    assert exposure.session.policy_version == "rules-v4"
+    assert "collaborative" in exposure.score_breakdown
+
+
+@pytest.mark.django_db
+def test_shared_account_choices_flow_into_the_recommendation_reason() -> None:
+    chicken = Food.objects.create(
+        canonical_name="치킨",
+        family="치킨",
+        staple_types=["bread"],
+        attributes={"protein": 0.9, "popularity": 0.8},
+    )
+    ramen = Food.objects.create(
+        canonical_name="라면",
+        family="라면",
+        staple_types=["noodle"],
+        attributes={"broth": 0.8, "popularity": 0.7},
+    )
+    for index in range(5):
+        for food in (chicken, ramen):
+            UserFoodEvent.objects.create(
+                anonymous_id=f"account-{index}",
+                food=food,
+                event_type=UserFoodEvent.EventType.ATE,
+            )
+    UserFoodEvent.objects.create(
+        anonymous_id="device-b",
+        food=chicken,
+        event_type=UserFoodEvent.EventType.ACCEPTED,
+    )
+    invalidate_collaborative_cache()
+
+    exposure = create_recommendation(
+        "device-b",
+        {},
+        filters={"staples": ["noodle"]},
+    )
+
+    assert exposure.food_id == ramen.id
+    assert exposure.score_breakdown["collaborative"] > 0
+    assert exposure.reason == "비슷한 선택을 한 사람들이 함께 고른 메뉴예요."

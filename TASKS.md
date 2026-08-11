@@ -43,3 +43,6 @@
 - [x] Add tested same-group OR and cross-group AND recommendation filters.
 - [x] Add the accessible machine-label multi-select filter dialog and empty-result recovery.
 - [x] Audit the exact 1,000-row catalog and all 72 temperature/staple/cuisine/spice combinations.
+- [x] Add privacy-thresholded item-item collaborative scoring to the `rules-v4` hybrid policy.
+- [x] Add an accessible food relationship graph with content, collaborative, and hybrid edges.
+- [x] Add reproducible graph privacy and source audits without introducing a graph database.
