@@ -50,3 +50,5 @@ The application is live on Vercel with a Neon free PostgreSQL database. The full
 - Added coverage, uniqueness, distribution, and edge-case regression checks.
 - Replaced the misleading first-use reason with an explicit cold-start explanation based on popularity and menu diversity.
 - Verified 19 backend tests, 5 frontend tests, Ruff, ESLint, Django checks, migration drift, TypeScript, and the Nuxt production build.
+- Updated all 342 Neon rows in place and confirmed 342 distinct descriptions, 294 distinct profiles, zero blanks, and 47 explicitly cold dishes in production.
+- Deployed the API, passed a live cold-start recommendation smoke test, and removed its temporary session and exposure.

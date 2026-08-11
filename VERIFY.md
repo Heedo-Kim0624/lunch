@@ -46,6 +46,9 @@ State: **PASS** for local SQLite and live Vercel + Neon production.
 - [x] GitHub Actions reproduces the backend and frontend quality gates without secrets.
 - [x] Neon Production migrations completed for content types, users, tokens, and recommendations.
 - [x] Production seed verified at 342 active foods.
+- [x] Production catalog quality update completed with `342 updated`; follow-up audit returned 342 distinct descriptions, 294 distinct attribute profiles, zero blanks, and 47 explicitly cold dishes.
+- [x] Production 바쿠테 now mentions pork ribs and reports `broth=0.9`, `light=0.4`, `adventurous=0.7`, `cold=0.0`, and `familiar=0.4`.
+- [x] Live cold-start recommendation returned the honest no-history reason and an item-specific description; its temporary session and exposure were removed afterward.
 - [x] Vercel Django API health returned HTTP 200 at `https://lunch-api-mocha.vercel.app/api/v1/health`.
 - [x] Production signup page returned HTTP 200 and CORS returned the exact web origin.
 - [x] Disposable production account completed register, current-user lookup, recommendation, `ACCEPTED` feedback, logout (HTTP 204), and login again.
