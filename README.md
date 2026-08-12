@@ -2,9 +2,10 @@
 
 레버를 한 번 당기면 음식 하나를 제안하고, 수락과 재추천 행동을 다음 추천에 반영하는 개인화 점심 추천기입니다.
 
-현재 버전은 Nuxt 4 UI, Django REST API, 이메일 회원가입·로그인, 1,000개 점심 메뉴, 다중 필터, 음식 특성과 로그인 사용자의 집계 선택 관계를 혼합하는 `rules-v4` 추천 정책, 개인정보를 노출하지 않는 음식 취향 지도를 포함합니다. GNN과 pgvector는 데이터가 필요성을 증명할 때까지 포함하지 않습니다.
+현재 버전은 Nuxt 4 UI, Django REST API, 이메일 회원가입·로그인, 1,000개 점심 메뉴, Single 개인 추천, 계정 없이 닉네임으로 참여하는 Multi 공유 점심방, 다중 필터와 `rules-v4` 추천 정책을 포함합니다. GNN과 pgvector는 데이터가 필요성을 증명할 때까지 포함하지 않습니다.
 
 - Live web: <https://lunch-web-ten.vercel.app>
+- Live multi lobby: <https://lunch-web-ten.vercel.app/multi>
 - Live taste graph: <https://lunch-web-ten.vercel.app/graph>
 - Live API health: <https://lunch-api-mocha.vercel.app/api/v1/health>
 - GitHub: <https://github.com/Heedo-Kim0624/lunch>
@@ -68,13 +69,21 @@ uv run --directory backend python manage.py audit_recommendation_graph
 ```text
 GET  /api/v1/health
 GET  /api/v1/recommendation-graph
+GET  /api/v1/foods?q={query}
 POST /api/v1/auth/register
 POST /api/v1/auth/login
 GET  /api/v1/auth/me
 POST /api/v1/auth/logout
 POST /api/v1/recommendations
 POST /api/v1/recommendations/{recommendation_id}/feedback
+POST /api/v1/multi/rooms
+GET  /api/v1/multi/rooms/{code}
+POST /api/v1/multi/rooms/{code}/join
+PUT  /api/v1/multi/rooms/{code}/choices
+POST /api/v1/multi/rooms/{code}/draw
 ```
+
+멀티방 생성과 참가 응답은 참가자 토큰을 한 번 반환합니다. 이후 목록 저장과 추첨은 `X-Multi-Token` 헤더를 사용하며, 공유 URL에는 토큰이 포함되지 않습니다. 참가자별 음식 목록은 본인에게만 보이고 다른 참가자에게는 닉네임, 완료 여부와 선택 개수만 표시됩니다.
 
 로그인 요청은 `Authorization: Token <token>` 헤더를 사용합니다. 로그인 상태에서는 추천과 피드백이 서버가 확인한 계정 ID에 귀속되고, 비로그인 상태에서는 기기 로컬 ID를 사용합니다.
 

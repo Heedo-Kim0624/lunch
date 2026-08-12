@@ -13,6 +13,8 @@ The first screen should communicate within two seconds: pull once, receive one l
 
 Only one primary action is emphasized in each state. Loading, success, and error states are announced through a polite live region.
 
+Multi mode keeps the same hierarchy: create or join a room, complete one personal food-list dialog, wait for every participant, then expose the host-only lever. Each participant is represented by one horizontally growing reel with nickname, host badge, choice count, and text readiness state. A no-overlap room uses explicit copy and a disabled lever rather than color alone.
+
 ## Visual Direction
 
 - A compact retro lunch-ticket machine rather than a generic dashboard.
@@ -31,6 +33,9 @@ Only one primary action is emphasized in each state. Loading, success, and error
 - Filter copy explains same-row OR, cross-row AND, and the unrestricted empty state before users apply selections.
 - The graph provides keyboard-focusable SVG food nodes, a visible selected-node inspector, semantic titles/descriptions, and a complete text-list alternative.
 - Relationship meaning is encoded by line weight and legend text as well as color; horizontal scrolling preserves legibility on small screens.
+- The Single and Multi selectors are native links in a left-side tab rail on desktop and a horizontal two-tab row on mobile.
+- Multi join and food-choice dialogs have visible labels, native form controls, Escape handling and focus trapping for the choice dialog, bounded 44-pixel targets, live status copy, and a text explanation for every disabled lever state.
+- Participant reels scroll horizontally as the room grows, keeping each nickname and readiness label readable without shrinking controls below their minimum target size.
 
 ## Design-system Check
 
@@ -39,6 +44,8 @@ Astryx XDS `Button` documentation was inspected. It requires accessible labels, 
 The account forms also follow the inspected XDS `TextInput` and `FormLayout` guidance: persistent visible labels, a vertical reading order, field-linked errors, autocomplete metadata, one primary submit action, and an explicit loading state.
 
 The graph keeps the established enamel monitor, paper inspector, and machine typography rather than adding an unrelated dashboard library. Astryx runtime remains intentionally absent because the project has a stronger Vue-native local system.
+
+The shared-room interface follows that same decision: it extends the existing enamel machine, paper ticket, metal lever, and native dialog controls instead of introducing a second component system.
 
 ## Spec/Test/Code/Review/Ship Trace
 

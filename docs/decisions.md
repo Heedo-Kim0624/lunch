@@ -15,3 +15,7 @@
 - Use revocable DRF tokens for the first account slice; migrate to an HttpOnly secure-cookie flow before a broader public launch.
 - Deploy the monorepo as separate Nuxt and Django Vercel projects connected to the same GitHub repository.
 - Do not install Astryx React runtime into Nuxt; carry over its verified interaction and accessibility guidance.
+- Use REST polling every three seconds for Multi rooms so the existing Vercel serverless deployment needs no persistent WebSocket process.
+- Treat the room code as a locator and a separately generated participant token as authorization; store only the SHA-256 token digest and never place the token in the share URL.
+- Count at most one vote per participant per food, require at least two votes for any draw, select only among top-vote foods, and permit rerolls only while multiple top leaders remain.
+- Freeze joining and list edits after the first draw so every participant sees a result derived from one stable set of submitted lists.

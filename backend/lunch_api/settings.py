@@ -3,6 +3,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import dj_database_url
+from corsheaders.defaults import default_headers
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -106,6 +107,7 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
     for regex in os.getenv("CORS_ALLOWED_ORIGIN_REGEXES", "").split(",")
     if regex.strip()
 ]
+CORS_ALLOW_HEADERS = (*default_headers, "x-multi-token")
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -114,6 +116,14 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
     "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
+    "DEFAULT_THROTTLE_RATES": {
+        "food_search": "240/min",
+        "multi_room_create": "20/hour",
+        "multi_room_join": "120/hour",
+        "multi_room_read": "600/min",
+        "multi_room_write": "120/min",
+        "multi_room_draw": "60/min",
+    },
 }
 
 if not DEBUG:

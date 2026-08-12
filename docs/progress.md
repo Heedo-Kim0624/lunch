@@ -1,5 +1,17 @@
 # Progress
 
+## 2026-08-12 — Shared Multi lunch room
+
+- Replaced the taste-map navigation action with left-side `Single` and `Multi` mode tabs while retaining the existing single-person recommendation flow.
+- Added 24-hour share rooms that allow account-free nickname joining and create one visual reel per participant.
+- Added searchable 1–12 item food lists, readiness state, three-second room polling, share-link copy, and responsive dialog/machine layouts.
+- Counted each participant at most once per food and limited the draw pool to the highest-vote foods.
+- Made unique leaders final, allowed tied leaders to be redrawn without an immediate repeat, and disabled the lever when every submitted food has only one vote.
+- Restricted drawing to the host, locked joining and list edits after the first draw, and stored only SHA-256 participant-token digests in the database.
+- Added transactional room mutations, row locking, endpoint throttles, nickname validation, bounded room/list sizes, and public-state privacy tests.
+- Passed the complete local gate with 66 backend tests, 14 frontend tests, Ruff, ESLint, Django checks, migration drift checks, TypeScript, and the Nuxt production build.
+- Applied migration `0005` locally and completed an end-to-end two-person room smoke test; all disposable room rows were removed afterward.
+
 ## 2026-08-11 — First vertical slice complete
 
 - Initialized the JARVIS V1.3 workspace harness and project documentation.

@@ -1,5 +1,17 @@
 # Review Checklist
 
+## Single / Multi shared room
+
+- [x] Taste-map navigation action is removed and Single/Multi mode links remain keyboard accessible.
+- [x] Guests join by nickname without an account, while room code and participant authorization token remain separate.
+- [x] Only token digests are stored; public room payloads contain no token or another participant's food list.
+- [x] Each participant submits 1–12 distinct active lunch foods and adds one visible readiness reel.
+- [x] The host lever requires two participants, everyone ready, and at least one food with two distinct votes.
+- [x] No-overlap rooms stay locked with explicit copy and an API `no_overlap` conflict.
+- [x] Unique top foods become final; tied top foods support non-repeating immediate rerolls.
+- [x] Joining and choice edits lock after the first draw.
+- [x] Room mutations use transactions and row locking; reads are bounded and throttled for polling.
+
 - [x] MVP scope is explicit and ML-heavy extensions are gated by evidence.
 - [x] The main lever is a semantic keyboard-accessible button.
 - [x] Loading, success, error, accept, and reroll states are represented.
