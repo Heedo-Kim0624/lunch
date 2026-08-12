@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-12
+
+- Added left-side `Single` and `Multi` navigation and removed the taste-map button from primary navigation.
+- Added nickname-only shared rooms, participant reels, share links, food-list dialogs, readiness polling, and host-only drawing.
+- Added deterministic top-vote eligibility, tied-leader rerolls, no-overlap locking, 24-hour expiry, hashed participant tokens, and transactional concurrency controls.
+- Added migration `0005`, nine backend room/API tests, and four frontend presentation-rule tests.
+
 ## 2026-08-11
 
 - Project initialized with JARVIS V1.3 scaffold.

@@ -40,5 +40,6 @@ coverage/
 /provider_registry.yaml
 /quality_gates.yaml
 /lunch.code-workspace
+/graphify-out/
 
 .vercel

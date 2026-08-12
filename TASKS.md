@@ -46,3 +46,9 @@
 - [x] Add privacy-thresholded item-item collaborative scoring to the `rules-v4` hybrid policy.
 - [x] Add an accessible food relationship graph with content, collaborative, and hybrid edges.
 - [x] Add reproducible graph privacy and source audits without introducing a graph database.
+- [x] Replace the taste-map action with left-side Single and Multi tabs.
+- [x] Add expiring shared rooms, hashed participant tokens, nickname-only guest joining, and food search.
+- [x] Add participant choice submission, readiness, overlap checks, host-only top-vote drawing, and tied-leader rerolls.
+- [x] Add participant reel UI, share link, choice dialog, polling synchronization, disabled-state explanations, and responsive accessibility coverage.
+- [x] Verify local migrations, concurrent room rules, full gates, and disposable room cleanup.
+- [ ] Apply the production migration, deploy both Vercel projects, verify the live guest flow, and clean up smoke data.

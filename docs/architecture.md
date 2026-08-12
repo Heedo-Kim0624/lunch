@@ -4,8 +4,10 @@
 
 ```text
 Nuxt 4 web client
+  ├─ Single / Multi mode tabs
   ├─ register / login / account state
-  ├─ multi-filter popup / lever / ticket / feedback
+  ├─ single filter popup / lever / ticket / feedback
+  ├─ shared-room join / food chooser / participant reels / host lever
   └─ privacy-safe food relationship graph
           │ HTTP JSON
           ▼
@@ -14,7 +16,8 @@ Django REST API
   ├─ recommendation orchestration
   ├─ content + collaborative + context scoring
   ├─ repetition penalty
-  └─ softmax exploration
+  ├─ softmax exploration
+  └─ polling-compatible shared-room voting service
           │ Django ORM
           ▼
 SQLite local default / Neon PostgreSQL production
@@ -54,6 +57,23 @@ active lunch foods
 The `rules-v4` score is explainable and versioned: 45% personal attribute preference, 15% collaborative affinity, 15% context, 10% novelty, and 15% popularity before repetition penalties. With no qualified shared history, the collaborative term stays neutral.
 
 ## API Contracts
+
+### Shared lunch rooms
+
+```text
+GET  /api/v1/foods?q={query}
+POST /api/v1/multi/rooms
+POST /api/v1/multi/rooms/{code}/join
+GET  /api/v1/multi/rooms/{code}
+PUT  /api/v1/multi/rooms/{code}/choices
+POST /api/v1/multi/rooms/{code}/draw
+```
+
+방 생성과 입장은 한 번만 표시되는 참가자 토큰을 반환한다. 이후 쓰기 요청은 `X-Multi-Token` 헤더를 사용하고 DB에는 SHA-256 해시만 저장한다. 방 코드는 엔트로피가 충분한 위치 식별자일 뿐 권한 비밀값은 아니다. 생성, 입장, 검색, 목록 저장과 추첨에는 각각 요청 제한을 적용한다.
+
+방 조회는 참가자 닉네임, 방장·완료 상태, 선택 개수, 집계 최다 후보와 현재 추첨 결과를 반환하며 토큰은 직렬화하지 않는다. 첫 추첨 뒤에는 목록과 입장을 잠근다. 방장 추첨은 데이터베이스 트랜잭션과 행 잠금 안에서 완료 상태와 표 수를 다시 계산한다.
+
+프런트엔드는 3초 간격으로 방 상태를 갱신한다. 영구 WebSocket 서버를 두지 않아 기존 Vercel + Neon 무료 구성을 유지한다.
 
 ### Register and authenticate
 

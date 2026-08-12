@@ -2,7 +2,22 @@
 
 ## Result
 
-State: **PASS** for local SQLite and the `rules-v4` Vercel production deployment.
+State: **PASS** for local SQLite and the existing `rules-v4` production baseline. Multi production deployment is pending.
+
+## 2026-08-12 Multi-room local verification
+
+- [x] `powershell -ExecutionPolicy Bypass -File .\scripts\verify.ps1`
+  - Ruff, ESLint, Django system check, and migration drift check: pass
+  - Backend pytest: 66 passed
+  - Frontend Vitest: 14 passed
+  - Nuxt TypeScript and production build: pass
+- [x] Migration `0005_multiroom_multiroomparticipant_multiroomchoice_and_more` applied to local SQLite.
+- [x] Two-person API smoke: create room, nickname-only guest join, both submit lists, shared leader becomes drawable, host draw returns the two-vote winner.
+- [x] Smoke cleanup removed four choices, two participants, and one room.
+- [x] Tests cover token digest storage, public choice privacy, nickname uniqueness, host-only draw, post-draw lock, tied reroll, no-overlap lock, active-food search, and unique-winner completion.
+- [x] Room/list mutations lock the room row inside transactions so join, submit, and draw rules are evaluated against one serialized state on PostgreSQL.
+- [x] Participant tokens are returned only at join/create time, sent through `X-Multi-Token`, and persisted only as SHA-256 digests.
+- [ ] Production migration, Vercel deployment, live two-person smoke, and cleanup.
 
 ## Automated checks
 

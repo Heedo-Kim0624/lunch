@@ -2,6 +2,10 @@
 
 ## Durable project knowledge
 
+- The UI now has two primary modes: `Single` keeps personal recommendation, while `Multi` coordinates an account-free shared lunch decision through an expiring link.
+- Multi votes are binary per participant and food. Only highest-vote foods enter the draw; a unique leader ends the room, tied leaders can be redrawn, and a room with no overlapping choice cannot draw.
+- Multi participant capability tokens are browser-held and database-hashed. Room codes locate rooms but do not authorize participant or host actions.
+- Multi uses three-second REST polling to stay within the current Vercel architecture; WebSockets remain a future scale/latency option.
 - The product is a personalized decision engine presented as a single lever, not a random menu picker.
 - The active policy is `rules-v4`: explicit hard filters, content attributes, authenticated-account item-item collaboration, context adjustments, repetition penalties, family-round-robin pooling, and bounded softmax exploration.
 - Shared affinity requires five distinct authenticated accounts, uses a 365-day window with 90-day decay, corrects popularity through cosine normalization, and never trains from public anonymous IDs.

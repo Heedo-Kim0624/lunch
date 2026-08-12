@@ -1,0 +1,261 @@
+import pytest
+from django.urls import reverse
+from rest_framework.test import APIClient
+
+from recommendations.models import Food, MultiRoom, MultiRoomParticipant
+
+
+@pytest.fixture
+def api_client() -> APIClient:
+    return APIClient()
+
+
+@pytest.fixture
+def multi_foods() -> list[Food]:
+    return [
+        Food.objects.create(
+            canonical_name=name,
+            family="공유 테스트",
+            cuisine="한식",
+            attributes={"popularity": 0.5},
+        )
+        for name in ("치킨", "라면", "김밥", "돈가스")
+    ]
+
+
+def create_room(api_client: APIClient, nickname: str = "방장") -> dict[str, object]:
+    response = api_client.post(
+        reverse("multi-room-create"), {"nickname": nickname}, format="json"
+    )
+    assert response.status_code == 201
+    return response.json()
+
+
+def join_room(api_client: APIClient, code: str, nickname: str) -> dict[str, object]:
+    response = api_client.post(
+        reverse("multi-room-join", kwargs={"code": code}),
+        {"nickname": nickname},
+        format="json",
+    )
+    assert response.status_code == 201
+    return response.json()
+
+
+def submit_choices(
+    api_client: APIClient, code: str, token: str, food_ids: list[int]
+) -> dict[str, object]:
+    response = api_client.put(
+        reverse("multi-room-choices", kwargs={"code": code}),
+        {"food_ids": food_ids},
+        format="json",
+        HTTP_X_MULTI_TOKEN=token,
+    )
+    assert response.status_code == 200
+    return response.json()
+
+
+@pytest.mark.django_db
+def test_room_creation_returns_host_token_but_stores_only_digest(
+    api_client: APIClient,
+) -> None:
+    payload = create_room(api_client)
+
+    room = MultiRoom.objects.get(code=payload["room"]["code"])
+    host = room.participants.get(is_host=True)
+    assert len(payload["participant_token"]) >= 32
+    assert host.token_digest != payload["participant_token"]
+    assert payload["room"]["self"]["is_host"] is True
+    assert "token" not in str(payload["room"]["participants"])
+
+
+@pytest.mark.django_db
+def test_guest_joins_without_an_account_and_adds_a_slot(api_client: APIClient) -> None:
+    created = create_room(api_client)
+    code = created["room"]["code"]
+
+    joined = join_room(api_client, code, "민지")
+
+    assert joined["room"]["participant_count"] == 2
+    assert joined["room"]["self"]["is_host"] is False
+    assert {person["nickname"] for person in joined["room"]["participants"]} == {
+        "방장",
+        "민지",
+    }
+    assert MultiRoomParticipant.objects.count() == 2
+
+
+@pytest.mark.django_db
+def test_public_room_state_never_exposes_any_participant_choices(
+    api_client: APIClient, multi_foods: list[Food]
+) -> None:
+    created = create_room(api_client)
+    code = created["room"]["code"]
+    submit_choices(api_client, code, created["participant_token"], [multi_foods[0].id])
+
+    response = api_client.get(reverse("multi-room-detail", kwargs={"code": code}))
+
+    assert response.status_code == 200
+    assert response.json()["room"]["self"] is None
+    assert all("choices" not in person for person in response.json()["room"]["participants"])
+    assert "participant_token" not in str(response.json())
+
+
+@pytest.mark.django_db
+def test_nicknames_are_case_insensitively_unique_per_room(api_client: APIClient) -> None:
+    created = create_room(api_client, "LunchBoss")
+    code = created["room"]["code"]
+
+    response = api_client.post(
+        reverse("multi-room-join", kwargs={"code": code}),
+        {"nickname": "lunchboss"},
+        format="json",
+    )
+
+    assert response.status_code == 400
+    assert response.json()["code"] == "nickname_taken"
+
+
+@pytest.mark.django_db
+def test_all_participants_submit_lists_and_host_draws_unique_top_food(
+    api_client: APIClient, multi_foods: list[Food]
+) -> None:
+    created = create_room(api_client)
+    code = created["room"]["code"]
+    host_token = created["participant_token"]
+    guest = join_room(api_client, code, "민지")
+    guest_token = guest["participant_token"]
+
+    submit_choices(
+        api_client, code, host_token, [multi_foods[0].id, multi_foods[1].id]
+    )
+    ready = submit_choices(
+        api_client, code, guest_token, [multi_foods[0].id, multi_foods[2].id]
+    )
+    assert ready["room"]["all_ready"] is True
+    assert [choice["name"] for choice in ready["room"]["self"]["choices"]] == [
+        "치킨",
+        "김밥",
+    ]
+    assert ready["room"]["can_draw"] is True
+    assert ready["room"]["leaders"] == [
+        {"id": multi_foods[0].id, "name": "치킨", "votes": 2}
+    ]
+
+    response = api_client.post(
+        reverse("multi-room-draw", kwargs={"code": code}),
+        format="json",
+        HTTP_X_MULTI_TOKEN=host_token,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["room"]["result"]["food"]["name"] == "치킨"
+    assert response.json()["room"]["result"]["votes"] == 2
+    assert response.json()["room"]["can_reroll"] is False
+
+    repeated = api_client.post(
+        reverse("multi-room-draw", kwargs={"code": code}),
+        format="json",
+        HTTP_X_MULTI_TOKEN=host_token,
+    )
+    assert repeated.status_code == 409
+    assert repeated.json()["code"] == "decision_complete"
+
+
+@pytest.mark.django_db
+def test_lever_stays_locked_when_every_food_has_one_vote(
+    api_client: APIClient, multi_foods: list[Food]
+) -> None:
+    created = create_room(api_client)
+    code = created["room"]["code"]
+    guest = join_room(api_client, code, "민지")
+    submit_choices(api_client, code, created["participant_token"], [multi_foods[0].id])
+    state = submit_choices(
+        api_client, code, guest["participant_token"], [multi_foods[1].id]
+    )
+
+    assert state["room"]["all_ready"] is True
+    assert state["room"]["can_draw"] is False
+    assert state["room"]["blocked_reason"] == "no_overlap"
+    assert state["room"]["leaders"] == []
+
+    response = api_client.post(
+        reverse("multi-room-draw", kwargs={"code": code}),
+        format="json",
+        HTTP_X_MULTI_TOKEN=created["participant_token"],
+    )
+    assert response.status_code == 409
+    assert response.json()["code"] == "no_overlap"
+
+
+@pytest.mark.django_db
+def test_tied_top_foods_can_be_redrawn_without_immediate_repeat(
+    api_client: APIClient, multi_foods: list[Food]
+) -> None:
+    created = create_room(api_client)
+    code = created["room"]["code"]
+    guest = join_room(api_client, code, "민지")
+    shared = [multi_foods[0].id, multi_foods[1].id]
+    submit_choices(api_client, code, created["participant_token"], shared)
+    submit_choices(api_client, code, guest["participant_token"], shared)
+
+    url = reverse("multi-room-draw", kwargs={"code": code})
+    first = api_client.post(
+        url, format="json", HTTP_X_MULTI_TOKEN=created["participant_token"]
+    )
+    second = api_client.post(
+        url, format="json", HTTP_X_MULTI_TOKEN=created["participant_token"]
+    )
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert first.json()["room"]["can_reroll"] is True
+    assert second.json()["room"]["result"]["food"]["id"] != first.json()["room"][
+        "result"
+    ]["food"]["id"]
+
+
+@pytest.mark.django_db
+def test_only_host_can_draw_and_joining_closes_after_first_draw(
+    api_client: APIClient, multi_foods: list[Food]
+) -> None:
+    created = create_room(api_client)
+    code = created["room"]["code"]
+    guest = join_room(api_client, code, "민지")
+    submit_choices(api_client, code, created["participant_token"], [multi_foods[0].id])
+    submit_choices(api_client, code, guest["participant_token"], [multi_foods[0].id])
+    draw_url = reverse("multi-room-draw", kwargs={"code": code})
+
+    forbidden = api_client.post(
+        draw_url, format="json", HTTP_X_MULTI_TOKEN=guest["participant_token"]
+    )
+    assert forbidden.status_code == 403
+    assert forbidden.json()["code"] == "host_only"
+
+    assert (
+        api_client.post(
+            draw_url,
+            format="json",
+            HTTP_X_MULTI_TOKEN=created["participant_token"],
+        ).status_code
+        == 200
+    )
+    late_join = api_client.post(
+        reverse("multi-room-join", kwargs={"code": code}),
+        {"nickname": "늦은 참가자"},
+        format="json",
+    )
+    assert late_join.status_code == 409
+    assert late_join.json()["code"] == "room_locked"
+
+
+@pytest.mark.django_db
+def test_food_search_returns_active_matches_only(
+    api_client: APIClient, multi_foods: list[Food]
+) -> None:
+    multi_foods[0].is_active = False
+    multi_foods[0].save(update_fields=["is_active"])
+
+    response = api_client.get(reverse("food-search"), {"q": "라"})
+
+    assert response.status_code == 200
+    assert [item["name"] for item in response.json()["foods"]] == ["라면"]
