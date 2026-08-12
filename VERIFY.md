@@ -2,7 +2,7 @@
 
 ## Result
 
-State: **PASS** for local SQLite and the existing `rules-v4` production baseline. Multi production deployment is pending.
+State: **PASS** for local SQLite and the deployed Neon/Vercel Multi-room slice.
 
 ## 2026-08-12 Multi-room local verification
 
@@ -18,7 +18,19 @@ State: **PASS** for local SQLite and the existing `rules-v4` production baseline
 - [x] Room/list mutations lock the room row inside transactions so join, submit, and draw rules are evaluated against one serialized state on PostgreSQL.
 - [x] PostgreSQL compatibility regression proves the locked room query does not outer-join the nullable result-food relation.
 - [x] Participant tokens are returned only at join/create time, sent through `X-Multi-Token`, and persisted only as SHA-256 digests.
-- [ ] Production migration, Vercel deployment, live two-person smoke, and cleanup.
+- [x] Production migration, Vercel deployment, live two-person smoke, and cleanup.
+
+## 2026-08-12 Multi-room production verification
+
+- [x] Neon migration `0005_multiroom_multiroomparticipant_multiroomchoice_and_more`: applied.
+- [x] PR #2 and PostgreSQL fix PR #3: checks passed and merged; final `main` run `31571682495` passed.
+- [x] API deployment `dpl_ES9mevFyFqCE45eRaTXbFZ12ejBx`: Ready and aliased to `https://lunch-api-mocha.vercel.app`.
+- [x] Web deployment `dpl_3iZCB9PsuEgCd9JGxqfNxo81NrjS`: Ready and aliased to `https://lunch-web-ten.vercel.app`.
+- [x] Live unique-winner flow: two nickname-only participants, both ready, shared food drawable, winner returned with two votes.
+- [x] Live tied-leader flow: two leaders at two votes, reroll enabled, second draw excluded the immediate previous result.
+- [x] Live no-overlap flow: all ready with `max_votes=1`, lever state false, draw returned HTTP 409 `no_overlap`.
+- [x] Public web: `/` and `/multi` returned HTTP 200, Single/Multi links rendered, no `/graph` navigation link rendered, and Chrome loaded the Korean Multi lobby title and visible flow copy.
+- [x] All four disposable production rooms were deleted with cascading participant/choice cleanup; each room code subsequently returned HTTP 404.
 
 ## Automated checks
 

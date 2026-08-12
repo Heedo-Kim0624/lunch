@@ -7,6 +7,7 @@
 - Added deterministic top-vote eligibility, tied-leader rerolls, no-overlap locking, 24-hour expiry, hashed participant tokens, and transactional concurrency controls.
 - Added migration `0005`, ten backend room/API tests, and four frontend presentation-rule tests.
 - Kept the PostgreSQL room lock on the room table only so a nullable result-food relationship never enters the `FOR UPDATE` query; added a regression test for the generated join shape.
+- Deployed the Neon migration and both Vercel projects, then passed live unique-winner, tied-reroll, no-overlap, browser-page, and smoke-data cleanup checks.
 
 ## 2026-08-11
 

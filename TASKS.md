@@ -51,4 +51,4 @@
 - [x] Add participant choice submission, readiness, overlap checks, host-only top-vote drawing, and tied-leader rerolls.
 - [x] Add participant reel UI, share link, choice dialog, polling synchronization, disabled-state explanations, and responsive accessibility coverage.
 - [x] Verify local migrations, concurrent room rules, full gates, and disposable room cleanup.
-- [ ] Apply the production migration, deploy both Vercel projects, verify the live guest flow, and clean up smoke data.
+- [x] Apply the production migration, deploy both Vercel projects, verify the live guest flow, and clean up smoke data.
