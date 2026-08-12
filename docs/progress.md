@@ -11,6 +11,10 @@
 - Added transactional room mutations, row locking, endpoint throttles, nickname validation, bounded room/list sizes, and public-state privacy tests.
 - Passed the complete local gate with 67 backend tests, 14 frontend tests, Ruff, ESLint, Django checks, migration drift checks, TypeScript, and the Nuxt production build.
 - Applied migration `0005` locally and completed an end-to-end two-person room smoke test; all disposable room rows were removed afterward.
+- Passed PR #2 and PR #3 checks and merged both to `main`; final `main` Actions run `31571682495` passed.
+- Applied migration `0005` to Neon and fixed a PostgreSQL-only nullable outer-join lock failure found by the first live guest-join smoke test.
+- Deployed API `dpl_ES9mevFyFqCE45eRaTXbFZ12ejBx` and web `dpl_3iZCB9PsuEgCd9JGxqfNxo81NrjS` to their existing production aliases.
+- Verified live unique-winner, tied-reroll, and no-overlap flows, confirmed the public Multi page in Chrome, and removed every disposable production room.
 
 ## 2026-08-11 — First vertical slice complete
 
