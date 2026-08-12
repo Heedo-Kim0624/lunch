@@ -5,7 +5,8 @@
 - Added left-side `Single` and `Multi` navigation and removed the taste-map button from primary navigation.
 - Added nickname-only shared rooms, participant reels, share links, food-list dialogs, readiness polling, and host-only drawing.
 - Added deterministic top-vote eligibility, tied-leader rerolls, no-overlap locking, 24-hour expiry, hashed participant tokens, and transactional concurrency controls.
-- Added migration `0005`, nine backend room/API tests, and four frontend presentation-rule tests.
+- Added migration `0005`, ten backend room/API tests, and four frontend presentation-rule tests.
+- Kept the PostgreSQL room lock on the room table only so a nullable result-food relationship never enters the `FOR UPDATE` query; added a regression test for the generated join shape.
 
 ## 2026-08-11
 

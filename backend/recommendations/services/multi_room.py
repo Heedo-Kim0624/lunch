@@ -44,9 +44,11 @@ def _new_room_code() -> str:
 
 
 def _active_room(code: str, *, lock: bool = False) -> MultiRoom:
-    queryset = MultiRoom.objects.select_related("result_food")
+    queryset = MultiRoom.objects.all()
     if lock:
         queryset = queryset.select_for_update()
+    else:
+        queryset = queryset.select_related("result_food")
     try:
         room = queryset.get(code=code.upper())
     except MultiRoom.DoesNotExist as error:
