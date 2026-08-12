@@ -9,7 +9,7 @@
 - Made unique leaders final, allowed tied leaders to be redrawn without an immediate repeat, and disabled the lever when every submitted food has only one vote.
 - Restricted drawing to the host, locked joining and list edits after the first draw, and stored only SHA-256 participant-token digests in the database.
 - Added transactional room mutations, row locking, endpoint throttles, nickname validation, bounded room/list sizes, and public-state privacy tests.
-- Passed the complete local gate with 66 backend tests, 14 frontend tests, Ruff, ESLint, Django checks, migration drift checks, TypeScript, and the Nuxt production build.
+- Passed the complete local gate with 67 backend tests, 14 frontend tests, Ruff, ESLint, Django checks, migration drift checks, TypeScript, and the Nuxt production build.
 - Applied migration `0005` locally and completed an end-to-end two-person room smoke test; all disposable room rows were removed afterward.
 
 ## 2026-08-11 — First vertical slice complete

@@ -1,4 +1,6 @@
 import pytest
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from rest_framework.test import APIClient
 
@@ -113,6 +115,31 @@ def test_nicknames_are_case_insensitively_unique_per_room(api_client: APIClient)
 
     assert response.status_code == 400
     assert response.json()["code"] == "nickname_taken"
+
+
+@pytest.mark.django_db(transaction=True)
+def test_join_lock_query_does_not_join_nullable_result_food(
+    api_client: APIClient,
+) -> None:
+    created = create_room(api_client)
+
+    with CaptureQueriesContext(connection) as queries:
+        response = api_client.post(
+            reverse("multi-room-join", kwargs={"code": created["room"]["code"]}),
+            {"nickname": "guest"},
+            format="json",
+        )
+
+    room_queries = [
+        query["sql"].upper()
+        for query in queries.captured_queries
+        if "RECOMMENDATIONS_MULTIROOM" in query["sql"].upper()
+    ]
+    assert response.status_code == 201
+    assert not any(
+        "LEFT OUTER JOIN" in query and "RECOMMENDATIONS_FOOD" in query
+        for query in room_queries
+    )
 
 
 @pytest.mark.django_db
