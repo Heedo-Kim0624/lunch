@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { MultiChoiceSubmission } from '../../types/multiRoom'
 import { multiLeverLabel, multiRoomStatusMessage, multiShareUrl } from '../../utils/multiRoom'
 
 const route = useRoute()
@@ -44,9 +45,9 @@ async function handleJoin(): Promise<void> {
   }
 }
 
-async function handleChoiceSubmit(foodIds: number[]): Promise<void> {
+async function handleChoiceSubmit(choices: MultiChoiceSubmission[]): Promise<void> {
   try {
-    await submitChoices(foodIds)
+    await submitChoices(choices)
     choiceDialogOpen.value = false
   }
   catch {
@@ -172,7 +173,7 @@ onBeforeUnmount(stopPolling)
           <div v-if="room.all_ready && room.leaders.length" class="multi-leaders">
             <span>현재 최다</span>
             <ul>
-              <li v-for="leader in room.leaders" :key="leader.id">
+              <li v-for="leader in room.leaders" :key="leader.key">
                 {{ leader.name }} <b>{{ leader.votes }}표</b>
               </li>
             </ul>

@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest'
 
 import type { MultiRoomState } from '../app/types/multiRoom'
 import {
+  directChoiceForQuery,
+  multiApiUrl,
+  multiChoiceSubmission,
   multiLeverLabel,
   multiRoomStatusMessage,
   multiShareUrl,
@@ -23,7 +26,7 @@ function room(overrides: Partial<MultiRoomState> = {}): MultiRoomState {
     can_draw: true,
     can_reroll: false,
     blocked_reason: null,
-    leaders: [{ id: 1, name: '치킨', votes: 2 }],
+    leaders: [{ id: 1, key: 'food:1', name: '치킨', votes: 2, is_custom: false }],
     max_votes: 2,
     result: null,
     ...overrides,
@@ -65,5 +68,33 @@ describe('multi room presentation rules', () => {
     expect(multiShareUrl('https://lunch.example/', 'abc234wxyz')).toBe(
       'https://lunch.example/multi/ABC234WXYZ',
     )
+  })
+
+  it('builds a stable food-search URL regardless of trailing slashes', () => {
+    expect(multiApiUrl('https://lunch.example/api/v1/', '/foods')).toBe(
+      'https://lunch.example/api/v1/foods',
+    )
+  })
+
+  it('uses an exact catalog match or creates a room-scoped direct choice', () => {
+    const catalogFood = {
+      id: 7,
+      key: 'food:7',
+      name: '라면',
+      family: '면',
+      cuisine: '한식',
+      is_custom: false,
+    }
+
+    expect(directChoiceForQuery('  라면 ', [catalogFood])).toEqual(catalogFood)
+
+    const custom = directChoiceForQuery('  새우   오일 파스타 ', [catalogFood])
+    expect(custom).toMatchObject({
+      id: null,
+      name: '새우 오일 파스타',
+      family: '직접 입력',
+      is_custom: true,
+    })
+    expect(multiChoiceSubmission(custom!)).toEqual({ custom_name: '새우 오일 파스타' })
   })
 })

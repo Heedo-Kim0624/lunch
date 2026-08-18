@@ -113,8 +113,16 @@ class MultiRoom(models.Model):
         null=True,
         blank=True,
     )
+    result_custom_food = models.ForeignKey(
+        "MultiRoomCustomFood",
+        on_delete=models.SET_NULL,
+        related_name="result_rooms",
+        null=True,
+        blank=True,
+    )
     result_votes = models.PositiveSmallIntegerField(default=0)
     leading_food_ids = models.JSONField(default=list)
+    leading_choice_keys = models.JSONField(default=list)
     draw_count = models.PositiveIntegerField(default=0)
     drawn_at = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField(db_index=True)
@@ -160,6 +168,29 @@ class MultiRoomParticipant(models.Model):
         return f"{self.room.code}:{self.nickname}"
 
 
+class MultiRoomCustomFood(models.Model):
+    room = models.ForeignKey(
+        MultiRoom,
+        on_delete=models.CASCADE,
+        related_name="custom_foods",
+    )
+    name = models.CharField(max_length=40)
+    normalized_name = models.CharField(max_length=120)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["room", "normalized_name"],
+                name="unique_multi_room_custom_food",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.room.code}:{self.name}"
+
+
 class MultiRoomChoice(models.Model):
     participant = models.ForeignKey(
         MultiRoomParticipant,
@@ -170,6 +201,15 @@ class MultiRoomChoice(models.Model):
         Food,
         on_delete=models.PROTECT,
         related_name="multi_room_choices",
+        null=True,
+        blank=True,
+    )
+    custom_food = models.ForeignKey(
+        MultiRoomCustomFood,
+        on_delete=models.CASCADE,
+        related_name="choices",
+        null=True,
+        blank=True,
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -179,8 +219,20 @@ class MultiRoomChoice(models.Model):
             models.UniqueConstraint(
                 fields=["participant", "food"],
                 name="unique_multi_participant_food",
-            )
+            ),
+            models.UniqueConstraint(
+                fields=["participant", "custom_food"],
+                name="unique_multi_participant_custom_food",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    Q(food__isnull=False, custom_food__isnull=True)
+                    | Q(food__isnull=True, custom_food__isnull=False)
+                ),
+                name="multi_choice_has_exactly_one_food_source",
+            ),
         ]
 
     def __str__(self) -> str:
-        return f"{self.participant_id}:{self.food_id}"
+        source = f"food:{self.food_id}" if self.food_id else f"custom:{self.custom_food_id}"
+        return f"{self.participant_id}:{source}"

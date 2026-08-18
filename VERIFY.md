@@ -2,7 +2,19 @@
 
 ## Result
 
-State: **PASS** for local SQLite and the deployed Neon/Vercel Multi-room slice.
+State: **PASS** for local SQLite and the deployed Neon/Vercel Multi-room baseline. The direct-entry production promotion is pending.
+
+## 2026-08-18 Multi search and direct-entry local verification
+
+- [x] Production catalog search returned HTTP 200 for `라면` with the exact web CORS origin; runtime logs showed user-session 404 requests to the API base path, motivating centralized URL construction.
+- [x] Slash-safe API URL, retry, and stale-response guards are covered by frontend tests.
+- [x] Direct entry works without a search result and serializes as `{custom_name}`; exact catalog matches serialize or resolve as the curated `Food`.
+- [x] Equal normalized direct names from two participants produce two votes and can win the host draw.
+- [x] Custom entries remain in `MultiRoomCustomFood`; no global `Food` row is created.
+- [x] Invalid characters, duplicate direct names, and catalog/direct duplicates are rejected.
+- [x] Migration `0006_multiroom_leading_choice_keys_and_more` applied to local SQLite.
+- [x] Full verifier: 70 backend tests, 16 frontend tests, Ruff, ESLint, Django checks, migration drift, TypeScript, and Nuxt production build passed.
+- [ ] Neon migration, Vercel API/web deployment, live browser/API smoke, and disposable-room cleanup.
 
 ## 2026-08-12 Multi-room local verification
 

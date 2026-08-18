@@ -1,9 +1,10 @@
 import type {
+  MultiChoiceSubmission,
   MultiRoomEnvelope,
   MultiRoomJoinEnvelope,
   MultiRoomState,
 } from '../types/multiRoom'
-import { roomTokenStorageKey } from '../utils/multiRoom'
+import { multiApiUrl, roomTokenStorageKey } from '../utils/multiRoom'
 
 interface MultiRoomApiError {
   code?: string
@@ -55,7 +56,7 @@ export function useMultiRoom(code: string) {
     }
     try {
       const response = await $fetch<MultiRoomEnvelope>(
-        `${config.public.apiBase}/multi/rooms/${encodeURIComponent(normalizedCode)}`,
+        multiApiUrl(config.public.apiBase, `multi/rooms/${encodeURIComponent(normalizedCode)}`),
         { headers: requestHeaders() },
       )
       room.value = response.room
@@ -85,7 +86,10 @@ export function useMultiRoom(code: string) {
     error.value = ''
     try {
       const response = await $fetch<MultiRoomJoinEnvelope>(
-        `${config.public.apiBase}/multi/rooms/${encodeURIComponent(normalizedCode)}/join`,
+        multiApiUrl(
+          config.public.apiBase,
+          `multi/rooms/${encodeURIComponent(normalizedCode)}/join`,
+        ),
         { method: 'POST', body: { nickname } },
       )
       saveToken(response.participant_token)
@@ -100,16 +104,19 @@ export function useMultiRoom(code: string) {
     }
   }
 
-  async function submitChoices(foodIds: number[]): Promise<void> {
+  async function submitChoices(choices: MultiChoiceSubmission[]): Promise<void> {
     isMutating.value = true
     error.value = ''
     try {
       const response = await $fetch<MultiRoomEnvelope>(
-        `${config.public.apiBase}/multi/rooms/${encodeURIComponent(normalizedCode)}/choices`,
+        multiApiUrl(
+          config.public.apiBase,
+          `multi/rooms/${encodeURIComponent(normalizedCode)}/choices`,
+        ),
         {
           method: 'PUT',
           headers: requestHeaders(),
-          body: { food_ids: foodIds },
+          body: { choices },
         },
       )
       room.value = response.room
@@ -128,7 +135,10 @@ export function useMultiRoom(code: string) {
     error.value = ''
     try {
       const response = await $fetch<MultiRoomEnvelope>(
-        `${config.public.apiBase}/multi/rooms/${encodeURIComponent(normalizedCode)}/draw`,
+        multiApiUrl(
+          config.public.apiBase,
+          `multi/rooms/${encodeURIComponent(normalizedCode)}/draw`,
+        ),
         { method: 'POST', headers: requestHeaders() },
       )
       room.value = response.room

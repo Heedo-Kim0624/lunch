@@ -5,7 +5,9 @@
 - [x] Taste-map navigation action is removed and Single/Multi mode links remain keyboard accessible.
 - [x] Guests join by nickname without an account, while room code and participant authorization token remain separate.
 - [x] Only token digests are stored; public room payloads contain no token or another participant's food list.
-- [x] Each participant submits 1–12 distinct active lunch foods and adds one visible readiness reel.
+- [x] Each participant submits 1–12 distinct catalog or room-scoped direct-entry foods and adds one visible readiness reel.
+- [x] Search uses a stable API URL and stale-response guard; direct add remains available during empty results or request failures.
+- [x] Direct names are validated and normalized, exact catalog matches resolve to `Food`, and custom rows never pollute the curated catalog.
 - [x] The host lever requires two participants, everyone ready, and at least one food with two distinct votes.
 - [x] No-overlap rooms stay locked with explicit copy and an API `no_overlap` conflict.
 - [x] Unique top foods become final; tied top foods support non-repeating immediate rerolls.

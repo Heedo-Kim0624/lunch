@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { MultiRoomJoinEnvelope } from '../../types/multiRoom'
-import { roomTokenStorageKey } from '../../utils/multiRoom'
+import { multiApiUrl, roomTokenStorageKey } from '../../utils/multiRoom'
 
 const config = useRuntimeConfig()
 const nickname = ref('')
@@ -17,7 +17,7 @@ async function createRoom(): Promise<void> {
   error.value = ''
   try {
     const response = await $fetch<MultiRoomJoinEnvelope>(
-      `${config.public.apiBase}/multi/rooms`,
+      multiApiUrl(config.public.apiBase, 'multi/rooms'),
       { method: 'POST', body: { nickname: nickname.value } },
     )
     localStorage.setItem(roomTokenStorageKey(response.room.code), response.participant_token)
