@@ -1,5 +1,14 @@
 # Progress
 
+## 2026-08-18 — Multi search recovery and direct menu entry
+
+- Reproduced a user-visible food-search failure and confirmed the catalog API itself still returned HTTP 200 with the production web CORS origin.
+- Replaced ad-hoc Multi endpoint concatenation with a slash-safe URL helper, added one retry, and prevented stale search failures from overwriting the latest result.
+- Added an always-available direct-entry action and Enter-key flow to the food chooser, including clear recovery copy when search is unavailable.
+- Added room-scoped custom foods with normalized overlap voting, exact catalog-name resolution, bounded validation, and no curated-catalog pollution.
+- Preserved the legacy `food_ids` write contract while adding mixed `{food_id}` / `{custom_name}` submissions.
+- Applied migration `0006` locally and passed the full gate with 70 backend tests, 16 frontend tests, lint, type checking, migration drift checking, and the Nuxt production build.
+
 ## 2026-08-12 — Shared Multi lunch room
 
 - Replaced the taste-map navigation action with left-side `Single` and `Multi` mode tabs while retaining the existing single-person recommendation flow.

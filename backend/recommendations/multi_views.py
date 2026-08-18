@@ -29,9 +29,7 @@ def participant_token(request: Request) -> str | None:
 
 
 def domain_error_response(error: MultiRoomDomainError) -> Response:
-    return Response(
-        {"code": error.code, "detail": error.detail}, status=error.status_code
-    )
+    return Response({"code": error.code, "detail": error.detail}, status=error.status_code)
 
 
 class FoodSearchView(APIView):
@@ -47,9 +45,11 @@ class FoodSearchView(APIView):
                 "foods": [
                     {
                         "id": food.id,
+                        "key": f"food:{food.id}",
                         "name": food.canonical_name,
                         "family": food.family,
                         "cuisine": food.cuisine,
+                        "is_custom": False,
                     }
                     for food in foods
                 ]
@@ -112,7 +112,7 @@ class MultiRoomChoicesView(APIView):
         serializer.is_valid(raise_exception=True)
         token = participant_token(request)
         try:
-            room = submit_choices(code, token, serializer.validated_data["food_ids"])
+            room = submit_choices(code, token, serializer.validated_data["choices"])
         except MultiRoomDomainError as error:
             return domain_error_response(error)
         return Response({"room": room_payload(room, token)})

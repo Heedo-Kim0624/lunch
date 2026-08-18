@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-08-18
+
+- Made Multi food search URL construction slash-safe, retry transient failures, and ignore stale responses.
+- Added keyboard-accessible direct menu entry that remains usable during empty results or search errors.
+- Added room-scoped custom-food persistence, normalized shared voting, exact catalog matching, validation, result payloads, and migration `0006`.
+- Expanded verification to 70 backend tests and 16 frontend tests.
+
 ## 2026-08-12
 
 - Added left-side `Single` and `Multi` navigation and removed the taste-map button from primary navigation.

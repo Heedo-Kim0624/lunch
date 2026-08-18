@@ -1941,6 +1941,50 @@ button:disabled {
   background: #eee5ce;
 }
 
+.multi-direct-add {
+  min-height: 58px;
+  margin-top: 0.55rem;
+}
+
+.multi-direct-add button {
+  width: 100%;
+  min-height: 54px;
+  padding: 0.55rem 0.75rem;
+  display: grid;
+  gap: 0.16rem;
+  border: 2px solid #c68f2d;
+  border-radius: 0.35rem;
+  color: #443c2d;
+  background: #f5df9e;
+  text-align: left;
+  cursor: pointer;
+}
+
+.multi-direct-add button:hover:not(:disabled) {
+  background: #ffe9a8;
+}
+
+.multi-direct-add button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.multi-direct-add span {
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.multi-direct-add small,
+.multi-direct-add p {
+  color: #6f634d;
+  font-size: 0.68rem;
+}
+
+.multi-direct-add p {
+  margin: 0;
+  padding: 0.6rem 0.2rem;
+}
+
 .multi-selected {
   margin-top: 0.9rem;
   padding: 0.8rem;

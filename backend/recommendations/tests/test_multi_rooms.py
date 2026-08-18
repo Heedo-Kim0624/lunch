@@ -4,7 +4,12 @@ from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from recommendations.models import Food, MultiRoom, MultiRoomParticipant
+from recommendations.models import (
+    Food,
+    MultiRoom,
+    MultiRoomCustomFood,
+    MultiRoomParticipant,
+)
 
 
 @pytest.fixture
@@ -26,9 +31,7 @@ def multi_foods() -> list[Food]:
 
 
 def create_room(api_client: APIClient, nickname: str = "방장") -> dict[str, object]:
-    response = api_client.post(
-        reverse("multi-room-create"), {"nickname": nickname}, format="json"
-    )
+    response = api_client.post(reverse("multi-room-create"), {"nickname": nickname}, format="json")
     assert response.status_code == 201
     return response.json()
 
@@ -49,6 +52,22 @@ def submit_choices(
     response = api_client.put(
         reverse("multi-room-choices", kwargs={"code": code}),
         {"food_ids": food_ids},
+        format="json",
+        HTTP_X_MULTI_TOKEN=token,
+    )
+    assert response.status_code == 200
+    return response.json()
+
+
+def submit_choice_items(
+    api_client: APIClient,
+    code: str,
+    token: str,
+    choices: list[dict[str, object]],
+) -> dict[str, object]:
+    response = api_client.put(
+        reverse("multi-room-choices", kwargs={"code": code}),
+        {"choices": choices},
         format="json",
         HTTP_X_MULTI_TOKEN=token,
     )
@@ -133,12 +152,11 @@ def test_join_lock_query_does_not_join_nullable_result_food(
     room_queries = [
         query["sql"].upper()
         for query in queries.captured_queries
-        if "RECOMMENDATIONS_MULTIROOM" in query["sql"].upper()
+        if 'FROM "RECOMMENDATIONS_MULTIROOM"' in query["sql"].upper()
     ]
     assert response.status_code == 201
     assert not any(
-        "LEFT OUTER JOIN" in query and "RECOMMENDATIONS_FOOD" in query
-        for query in room_queries
+        "LEFT OUTER JOIN" in query and "RECOMMENDATIONS_FOOD" in query for query in room_queries
     )
 
 
@@ -152,12 +170,8 @@ def test_all_participants_submit_lists_and_host_draws_unique_top_food(
     guest = join_room(api_client, code, "민지")
     guest_token = guest["participant_token"]
 
-    submit_choices(
-        api_client, code, host_token, [multi_foods[0].id, multi_foods[1].id]
-    )
-    ready = submit_choices(
-        api_client, code, guest_token, [multi_foods[0].id, multi_foods[2].id]
-    )
+    submit_choices(api_client, code, host_token, [multi_foods[0].id, multi_foods[1].id])
+    ready = submit_choices(api_client, code, guest_token, [multi_foods[0].id, multi_foods[2].id])
     assert ready["room"]["all_ready"] is True
     assert [choice["name"] for choice in ready["room"]["self"]["choices"]] == [
         "치킨",
@@ -165,7 +179,13 @@ def test_all_participants_submit_lists_and_host_draws_unique_top_food(
     ]
     assert ready["room"]["can_draw"] is True
     assert ready["room"]["leaders"] == [
-        {"id": multi_foods[0].id, "name": "치킨", "votes": 2}
+        {
+            "id": multi_foods[0].id,
+            "key": f"food:{multi_foods[0].id}",
+            "name": "치킨",
+            "votes": 2,
+            "is_custom": False,
+        }
     ]
 
     response = api_client.post(
@@ -196,9 +216,7 @@ def test_lever_stays_locked_when_every_food_has_one_vote(
     code = created["room"]["code"]
     guest = join_room(api_client, code, "민지")
     submit_choices(api_client, code, created["participant_token"], [multi_foods[0].id])
-    state = submit_choices(
-        api_client, code, guest["participant_token"], [multi_foods[1].id]
-    )
+    state = submit_choices(api_client, code, guest["participant_token"], [multi_foods[1].id])
 
     assert state["room"]["all_ready"] is True
     assert state["room"]["can_draw"] is False
@@ -226,19 +244,16 @@ def test_tied_top_foods_can_be_redrawn_without_immediate_repeat(
     submit_choices(api_client, code, guest["participant_token"], shared)
 
     url = reverse("multi-room-draw", kwargs={"code": code})
-    first = api_client.post(
-        url, format="json", HTTP_X_MULTI_TOKEN=created["participant_token"]
-    )
-    second = api_client.post(
-        url, format="json", HTTP_X_MULTI_TOKEN=created["participant_token"]
-    )
+    first = api_client.post(url, format="json", HTTP_X_MULTI_TOKEN=created["participant_token"])
+    second = api_client.post(url, format="json", HTTP_X_MULTI_TOKEN=created["participant_token"])
 
     assert first.status_code == 200
     assert second.status_code == 200
     assert first.json()["room"]["can_reroll"] is True
-    assert second.json()["room"]["result"]["food"]["id"] != first.json()["room"][
-        "result"
-    ]["food"]["id"]
+    assert (
+        second.json()["room"]["result"]["food"]["id"]
+        != first.json()["room"]["result"]["food"]["id"]
+    )
 
 
 @pytest.mark.django_db
@@ -286,3 +301,116 @@ def test_food_search_returns_active_matches_only(
 
     assert response.status_code == 200
     assert [item["name"] for item in response.json()["foods"]] == ["라면"]
+
+
+@pytest.mark.django_db
+def test_equal_direct_menu_names_overlap_and_can_win(api_client: APIClient) -> None:
+    created = create_room(api_client)
+    code = created["room"]["code"]
+    guest = join_room(api_client, code, "민지")
+
+    submit_choice_items(
+        api_client,
+        code,
+        created["participant_token"],
+        [{"custom_name": "새우 오일 파스타"}],
+    )
+    ready = submit_choice_items(
+        api_client,
+        code,
+        guest["participant_token"],
+        [{"custom_name": "  새우   오일 파스타  "}],
+    )
+
+    assert ready["room"]["can_draw"] is True
+    assert ready["room"]["leaders"][0]["name"] == "새우 오일 파스타"
+    assert ready["room"]["leaders"][0]["is_custom"] is True
+    assert ready["room"]["leaders"][0]["votes"] == 2
+    assert not Food.objects.filter(canonical_name="새우 오일 파스타").exists()
+    assert (
+        MultiRoomCustomFood.objects.filter(
+            room__code=code,
+            normalized_name="새우 오일 파스타",
+        ).count()
+        == 1
+    )
+
+    drawn = api_client.post(
+        reverse("multi-room-draw", kwargs={"code": code}),
+        format="json",
+        HTTP_X_MULTI_TOKEN=created["participant_token"],
+    )
+    assert drawn.status_code == 200
+    assert drawn.json()["room"]["result"]["food"]["name"] == "새우 오일 파스타"
+    assert drawn.json()["room"]["result"]["food"]["id"] is None
+    assert drawn.json()["room"]["result"]["food"]["is_custom"] is True
+
+
+@pytest.mark.django_db
+def test_direct_exact_catalog_name_resolves_to_catalog_food(
+    api_client: APIClient, multi_foods: list[Food]
+) -> None:
+    created = create_room(api_client)
+    code = created["room"]["code"]
+    guest = join_room(api_client, code, "민지")
+
+    submit_choice_items(
+        api_client,
+        code,
+        created["participant_token"],
+        [{"custom_name": " 치킨 "}],
+    )
+    ready = submit_choice_items(
+        api_client,
+        code,
+        guest["participant_token"],
+        [{"food_id": multi_foods[0].id}],
+    )
+
+    assert ready["room"]["leaders"][0]["id"] == multi_foods[0].id
+    assert ready["room"]["leaders"][0]["is_custom"] is False
+    assert ready["room"]["max_votes"] == 2
+
+
+@pytest.mark.django_db
+def test_invalid_or_duplicate_direct_menu_names_are_rejected(
+    api_client: APIClient,
+    multi_foods: list[Food],
+) -> None:
+    created = create_room(api_client)
+    url = reverse("multi-room-choices", kwargs={"code": created["room"]["code"]})
+    headers = {"HTTP_X_MULTI_TOKEN": created["participant_token"]}
+
+    invalid = api_client.put(
+        url,
+        {"choices": [{"custom_name": "<script>"}]},
+        format="json",
+        **headers,
+    )
+    duplicate = api_client.put(
+        url,
+        {
+            "choices": [
+                {"custom_name": "새우 파스타"},
+                {"custom_name": "  새우   파스타 "},
+            ]
+        },
+        format="json",
+        **headers,
+    )
+    catalog_duplicate = api_client.put(
+        url,
+        {
+            "choices": [
+                {"food_id": multi_foods[0].id},
+                {"custom_name": "치킨"},
+            ]
+        },
+        format="json",
+        **headers,
+    )
+
+    assert invalid.status_code == 400
+    assert duplicate.status_code == 400
+    assert catalog_duplicate.status_code == 400
+    assert catalog_duplicate.json()["code"] == "duplicate_choices"

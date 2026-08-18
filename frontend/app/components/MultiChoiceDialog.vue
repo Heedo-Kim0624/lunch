@@ -1,5 +1,15 @@
 <script setup lang="ts">
-import type { FoodSearchEnvelope, MultiFoodSummary } from '../types/multiRoom'
+import type {
+  FoodSearchEnvelope,
+  MultiChoiceSubmission,
+  MultiFoodSummary,
+} from '../types/multiRoom'
+import {
+  directChoiceForQuery,
+  multiApiUrl,
+  multiChoiceSubmission,
+  normalizeMultiChoiceName,
+} from '../utils/multiRoom'
 
 const props = defineProps<{
   open: boolean
@@ -9,7 +19,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   close: []
-  submit: [foodIds: number[]]
+  submit: [choices: MultiChoiceSubmission[]]
 }>()
 
 const config = useRuntimeConfig()
@@ -21,32 +31,52 @@ const selected = ref<MultiFoodSummary[]>([])
 const isSearching = ref(false)
 const searchError = ref('')
 let searchTimer: ReturnType<typeof setTimeout> | null = null
+let searchRequestId = 0
 
-const selectedIds = computed(() => new Set(selected.value.map(food => food.id)))
+const selectedNames = computed(
+  () => new Set(selected.value.map(food => normalizeMultiChoiceName(food.name))),
+)
+const directChoice = computed(() => directChoiceForQuery(query.value, results.value))
 const canSubmit = computed(
   () => selected.value.length >= 1 && selected.value.length <= 12 && !props.submitting,
 )
 
 async function searchFoods(): Promise<void> {
+  const requestId = ++searchRequestId
   isSearching.value = true
   searchError.value = ''
   try {
-    const response = await $fetch<FoodSearchEnvelope>(`${config.public.apiBase}/foods`, {
-      query: { q: query.value.trim() },
-    })
+    const response = await $fetch<FoodSearchEnvelope>(
+      multiApiUrl(config.public.apiBase, 'foods'),
+      {
+        query: { q: query.value.trim() },
+        retry: 1,
+      },
+    )
+    if (requestId !== searchRequestId) {
+      return
+    }
     results.value = response.foods
   }
   catch {
-    searchError.value = '음식 목록을 불러오지 못했어요.'
+    if (requestId !== searchRequestId) {
+      return
+    }
+    searchError.value = '검색 서버에 연결하지 못했어요. 입력한 메뉴는 직접 추가할 수 있어요.'
   }
   finally {
-    isSearching.value = false
+    if (requestId === searchRequestId) {
+      isSearching.value = false
+    }
   }
 }
 
 function toggleFood(food: MultiFoodSummary): void {
-  if (selectedIds.value.has(food.id)) {
-    selected.value = selected.value.filter(item => item.id !== food.id)
+  const normalizedName = normalizeMultiChoiceName(food.name)
+  if (selectedNames.value.has(normalizedName)) {
+    selected.value = selected.value.filter(
+      item => normalizeMultiChoiceName(item.name) !== normalizedName,
+    )
     return
   }
   if (selected.value.length < 12) {
@@ -54,13 +84,27 @@ function toggleFood(food: MultiFoodSummary): void {
   }
 }
 
-function removeFood(foodId: number): void {
-  selected.value = selected.value.filter(food => food.id !== foodId)
+function isChoiceSelected(food: MultiFoodSummary): boolean {
+  return selectedNames.value.has(normalizeMultiChoiceName(food.name))
+}
+
+function addDirectChoice(): void {
+  if (!directChoice.value || selected.value.length >= 12) {
+    return
+  }
+  if (!isChoiceSelected(directChoice.value)) {
+    selected.value = [...selected.value, directChoice.value]
+  }
+  query.value = ''
+}
+
+function removeFood(choiceKey: string): void {
+  selected.value = selected.value.filter(food => food.key !== choiceKey)
 }
 
 function submit(): void {
   if (canSubmit.value) {
-    emit('submit', selected.value.map(food => food.id))
+    emit('submit', selected.value.map(multiChoiceSubmission))
   }
 }
 
@@ -97,6 +141,7 @@ watch(
   () => props.open,
   async (open) => {
     if (!open) {
+      searchRequestId += 1
       return
     }
     selected.value = [...props.initialChoices]
@@ -150,7 +195,7 @@ onBeforeUnmount(() => {
         </p>
 
         <label class="multi-food-search">
-          <span>음식 검색</span>
+          <span>음식 검색 또는 직접 입력</span>
           <input
             ref="searchInput"
             v-model="query"
@@ -158,8 +203,25 @@ onBeforeUnmount(() => {
             maxlength="40"
             placeholder="치킨, 라면, 김밥…"
             autocomplete="off"
+            @keydown.enter.prevent="addDirectChoice"
           >
         </label>
+
+        <div class="multi-direct-add">
+          <button
+            v-if="directChoice"
+            type="button"
+            :disabled="selected.length >= 12 || isChoiceSelected(directChoice)"
+            @click="addDirectChoice"
+          >
+            <span>“{{ directChoice.name }}” 목록에 추가</span>
+            <small>{{ directChoice.is_custom ? '검색 결과에 없어도 직접 추가할 수 있어요.' : '카탈로그 메뉴와 일치해요.' }}</small>
+          </button>
+          <p v-else-if="query.trim()">
+            메뉴 이름은 40자 이하의 문자·숫자와 일반 구두점으로 입력해 주세요.
+          </p>
+          <p v-else>검색하거나 메뉴 이름을 입력한 뒤 Enter를 누르세요.</p>
+        </div>
 
         <div class="multi-selected" aria-live="polite">
           <div class="multi-selected-heading">
@@ -168,9 +230,9 @@ onBeforeUnmount(() => {
           </div>
           <p v-if="selected.length === 0" class="multi-empty-copy">아직 고른 음식이 없어요.</p>
           <ul v-else>
-            <li v-for="food in selected" :key="food.id">
+            <li v-for="food in selected" :key="food.key">
               <span>{{ food.name }}</span>
-              <button type="button" :aria-label="`${food.name} 목록에서 제거`" @click="removeFood(food.id)">
+              <button type="button" :aria-label="`${food.name} 목록에서 제거`" @click="removeFood(food.key)">
                 ×
               </button>
             </li>
@@ -182,19 +244,19 @@ onBeforeUnmount(() => {
           <p v-else-if="searchError" role="alert">{{ searchError }}</p>
           <p v-else-if="results.length === 0">검색 결과가 없어요.</p>
           <ul v-else>
-            <li v-for="food in results" :key="food.id">
+            <li v-for="food in results" :key="food.key">
               <button
                 type="button"
-                :class="{ 'food-result-selected': selectedIds.has(food.id) }"
-                :aria-pressed="selectedIds.has(food.id)"
-                :disabled="!selectedIds.has(food.id) && selected.length >= 12"
+                :class="{ 'food-result-selected': isChoiceSelected(food) }"
+                :aria-pressed="isChoiceSelected(food)"
+                :disabled="!isChoiceSelected(food) && selected.length >= 12"
                 @click="toggleFood(food)"
               >
                 <span>
                   <strong>{{ food.name }}</strong>
                   <small>{{ food.cuisine }} · {{ food.family }}</small>
                 </span>
-                <b>{{ selectedIds.has(food.id) ? '선택됨' : '추가' }}</b>
+                <b>{{ isChoiceSelected(food) ? '선택됨' : '추가' }}</b>
               </button>
             </li>
           </ul>

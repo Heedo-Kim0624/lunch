@@ -14,6 +14,7 @@
 ## Active
 
 - [ ] Collect first-use feedback from local lunch decisions.
+- [ ] Deploy and live-verify resilient Multi search and room-scoped direct menu entry.
 
 ## Done
 

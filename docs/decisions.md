@@ -19,3 +19,4 @@
 - Treat the room code as a locator and a separately generated participant token as authorization; store only the SHA-256 token digest and never place the token in the share URL.
 - Count at most one vote per participant per food, require at least two votes for any draw, select only among top-vote foods, and permit rerolls only while multiple top leaders remain.
 - Freeze joining and list edits after the first draw so every participant sees a result derived from one stable set of submitted lists.
+- Keep typed Multi menus room-scoped instead of creating global `Food` rows; normalize equal names for voting and resolve exact catalog names back to their curated food.

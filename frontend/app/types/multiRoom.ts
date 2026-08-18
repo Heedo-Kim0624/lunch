@@ -1,9 +1,15 @@
 export interface MultiFoodSummary {
-  id: number
+  id: number | null
+  key: string
   name: string
   family: string
   cuisine: string
+  is_custom: boolean
 }
+
+export type MultiChoiceSubmission =
+  | { food_id: number }
+  | { custom_name: string }
 
 export interface MultiParticipant {
   id: number
@@ -21,9 +27,11 @@ export interface MultiRoomSelf {
 }
 
 export interface MultiRoomLeader {
-  id: number
+  id: number | null
+  key: string
   name: string
   votes: number
+  is_custom: boolean
 }
 
 export interface MultiRoomResult {
