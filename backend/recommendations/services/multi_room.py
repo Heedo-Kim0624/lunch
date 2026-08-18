@@ -451,3 +451,16 @@ def search_foods(query: str) -> QuerySet[Food]:
     if query:
         foods = foods.filter(canonical_name__icontains=query)
     return foods.order_by("canonical_name")[:30]
+
+
+def search_room_custom_foods(
+    room: MultiRoom,
+    query: str,
+) -> QuerySet[MultiRoomCustomFood]:
+    foods = MultiRoomCustomFood.objects.filter(
+        room=room,
+        choices__participant__room=room,
+    )
+    if query:
+        foods = foods.filter(name__icontains=query)
+    return foods.order_by("name").distinct()[:30]

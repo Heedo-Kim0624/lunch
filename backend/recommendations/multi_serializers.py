@@ -4,6 +4,7 @@ import unicodedata
 from rest_framework import serializers
 
 NICKNAME_PATTERN = re.compile(r"^[0-9A-Za-z가-힣 _-]+$")
+ROOM_CODE_PATTERN = re.compile(r"^[A-HJ-NP-Z2-9]{10}$", re.IGNORECASE)
 DIRECT_MENU_PUNCTUATION = frozenset(" &+()/',.·_-")
 
 
@@ -112,3 +113,11 @@ class MultiChoicesSerializer(serializers.Serializer):
 
 class FoodSearchSerializer(serializers.Serializer):
     q = serializers.CharField(required=False, default="", max_length=40, trim_whitespace=True)
+    room = serializers.RegexField(
+        ROOM_CODE_PATTERN,
+        required=False,
+        trim_whitespace=True,
+    )
+
+    def validate_room(self, value: str) -> str:
+        return value.upper()

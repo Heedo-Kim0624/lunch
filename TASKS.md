@@ -14,6 +14,7 @@
 ## Active
 
 - [ ] Collect first-use feedback from local lunch decisions.
+- [ ] Deploy and live-verify the CRLF-safe Multi search and participant-only room menu suggestions.
 
 ## Done
 

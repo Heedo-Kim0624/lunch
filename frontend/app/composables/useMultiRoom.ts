@@ -168,6 +168,7 @@ export function useMultiRoom(code: string) {
 
   return {
     room,
+    participantToken: readonly(token),
     isLoading,
     isMutating,
     error,

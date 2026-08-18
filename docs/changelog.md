@@ -2,6 +2,9 @@
 
 ## 2026-08-18
 
+- Fixed production Multi search requests that were truncated to `/api/v1` by CRLF in the Vercel runtime API base.
+- Added participant-authenticated search suggestions for direct menus currently selected in the same room without exposing selectors or vote counts.
+- Allowed the stable and project-scoped Vercel web aliases through the API CORS boundary.
 - Made Multi food search URL construction slash-safe, retry transient failures, and ignore stale responses.
 - Added keyboard-accessible direct menu entry that remains usable during empty results or search errors.
 - Added room-scoped custom-food persistence, normalized shared voting, exact catalog matching, validation, result payloads, and migration `0006`.

@@ -7,6 +7,7 @@ const rawCode = Array.isArray(route.params.code) ? route.params.code[0] : route.
 const code = String(rawCode || '').toUpperCase()
 const {
   room,
+  participantToken,
   isLoading,
   isMutating,
   error,
@@ -239,6 +240,8 @@ onBeforeUnmount(stopPolling)
 
       <MultiChoiceDialog
         :open="choiceDialogOpen && Boolean(room.self) && room.status === 'WAITING'"
+        :room-code="code"
+        :participant-token="participantToken"
         :initial-choices="room.self?.choices || []"
         :submitting="isMutating"
         @close="choiceDialogOpen = false"

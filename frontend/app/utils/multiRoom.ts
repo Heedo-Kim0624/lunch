@@ -8,7 +8,9 @@ const ROOM_TOKEN_PREFIX = 'lunch-multi-participant-token:'
 const DIRECT_MENU_PATTERN = /^[\p{L}\p{N} &+()/',.·_-]+$/u
 
 export function multiApiUrl(base: string, path: string): string {
-  return `${String(base).replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`
+  const normalizedBase = String(base).trim().replace(/\/+$/, '')
+  const normalizedPath = path.trim().replace(/^\/+/, '')
+  return `${normalizedBase}/${normalizedPath}`
 }
 
 export function normalizeMultiChoiceName(value: string): string {
