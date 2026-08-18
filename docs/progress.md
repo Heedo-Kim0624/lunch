@@ -7,6 +7,9 @@
 - Made the Multi URL helper trim surrounding whitespace and CRLF before joining paths and added an exact regression test for the deployed value shape.
 - Added token-gated room-aware search so current room custom choices appear beside catalog matches without exposing participant identity or vote counts; removed choices no longer appear.
 - Added project-scoped Vercel alias CORS coverage and passed the full local gate with 74 backend tests, 16 frontend tests, lint, type checking, migration drift checking, and the Nuxt production build.
+- Passed PR #7 checks, merged as `a1ddb85`, and passed final `main` Actions run `32096251100`.
+- Deployed API `dpl_GtvbGP9UofCvcLmjzw4mSkksnqK4` and web `dpl_DuCb7mcstZBJAS8a8k98DY7Mw2up` to the existing aliases without a database migration.
+- Verified live catalog search, participant-only room custom search, production-bundle URL trimming, deployment-origin CORS, zero post-deploy base-path 404s, and disposable-room cleanup.
 
 ## 2026-08-18 — Multi search recovery and direct menu entry
 
