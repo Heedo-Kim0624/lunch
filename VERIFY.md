@@ -2,7 +2,7 @@
 
 ## Result
 
-State: **PASS** locally for the CRLF-safe, room-aware search repair. Production promotion is pending.
+State: **PASS** for the deployed CRLF-safe, room-aware Multi search repair.
 
 ## 2026-08-18 Multi production search runtime repair
 
@@ -12,7 +12,12 @@ State: **PASS** locally for the CRLF-safe, room-aware search repair. Production 
 - [x] Valid room participants can search current room custom choices; anonymous room searches return HTTP 403, selectors and votes are omitted, and removed choices disappear.
 - [x] Stable, owner alias, and project deployment-style Vercel web origins receive the exact CORS allow-origin header.
 - [x] Full verifier: 74 backend tests, 16 frontend tests, Ruff, ESLint, Django checks, migration drift, TypeScript, and Nuxt production build passed.
-- [ ] GitHub Actions, API/web deployment, live catalog and room-custom search, request-path verification, and disposable-room cleanup.
+- [x] PR #7 merged as `a1ddb85`; final `main` GitHub Actions run `32096251100` passed backend and frontend jobs.
+- [x] API deployment `dpl_GtvbGP9UofCvcLmjzw4mSkksnqK4` and web deployment `dpl_DuCb7mcstZBJAS8a8k98DY7Mw2up` reached Ready on the production aliases; no migration was required.
+- [x] Live room search returned the participant-visible custom menu with `is_custom=true` and no vote metadata; live catalog search returned HTTP 200.
+- [x] The deployed web route returned HTTP 200 and its production bundles contain the CRLF trim and room/token search request.
+- [x] Project deployment-origin CORS returned the exact origin, and the post-deploy log window contained zero `/api/v1` 404s with successful `/api/v1/foods` requests.
+- [x] The disposable room, two participants, one choice, and one custom menu were deleted; follow-up room lookup returned HTTP 404.
 
 ## 2026-08-18 Multi search and direct-entry local verification
 

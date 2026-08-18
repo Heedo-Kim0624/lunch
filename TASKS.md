@@ -14,7 +14,6 @@
 ## Active
 
 - [ ] Collect first-use feedback from local lunch decisions.
-- [ ] Deploy and live-verify the CRLF-safe Multi search and participant-only room menu suggestions.
 
 ## Done
 
@@ -54,3 +53,4 @@
 - [x] Verify local migrations, concurrent room rules, full gates, and disposable room cleanup.
 - [x] Apply the production migration, deploy both Vercel projects, verify the live guest flow, and clean up smoke data.
 - [x] Restore resilient Multi food search and deploy room-scoped direct menu entry with live overlap, draw, and cleanup verification.
+- [x] Repair the production CRLF search failure and deploy participant-only room menu suggestions with live log and cleanup verification.
