@@ -14,7 +14,6 @@
 ## Active
 
 - [ ] Collect first-use feedback from local lunch decisions.
-- [ ] Deploy and live-verify resilient Multi search and room-scoped direct menu entry.
 
 ## Done
 
@@ -53,3 +52,4 @@
 - [x] Add participant reel UI, share link, choice dialog, polling synchronization, disabled-state explanations, and responsive accessibility coverage.
 - [x] Verify local migrations, concurrent room rules, full gates, and disposable room cleanup.
 - [x] Apply the production migration, deploy both Vercel projects, verify the live guest flow, and clean up smoke data.
+- [x] Restore resilient Multi food search and deploy room-scoped direct menu entry with live overlap, draw, and cleanup verification.

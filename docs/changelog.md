@@ -6,6 +6,7 @@
 - Added keyboard-accessible direct menu entry that remains usable during empty results or search errors.
 - Added room-scoped custom-food persistence, normalized shared voting, exact catalog matching, validation, result payloads, and migration `0006`.
 - Expanded verification to 70 backend tests and 16 frontend tests.
+- Applied migration `0006` to Neon, deployed both Vercel production projects, verified the live direct-entry winner flow, and removed the disposable room.
 
 ## 2026-08-12
 

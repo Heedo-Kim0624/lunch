@@ -8,6 +8,11 @@
 - Added room-scoped custom foods with normalized overlap voting, exact catalog-name resolution, bounded validation, and no curated-catalog pollution.
 - Preserved the legacy `food_ids` write contract while adding mixed `{food_id}` / `{custom_name}` submissions.
 - Applied migration `0006` locally and passed the full gate with 70 backend tests, 16 frontend tests, lint, type checking, migration drift checking, and the Nuxt production build.
+- Passed both GitHub Actions jobs on PR #5 and merged the fix to `main` as `0c14577`.
+- Applied migration `0006` to Neon, deployed API `dpl_B86L3SDwtVA6FzwyAYDEjWVbuGfo`, and deployed web `dpl_CcWUmGJaz1CHznU9D5gWMbjt1XbG` to the existing production aliases.
+- Verified a live two-person direct-entry flow: whitespace-normalized names combined into a two-vote custom leader and the host draw returned that winner.
+- Confirmed live catalog search and the deployed direct-add UI bundle, then deleted the disposable room and verified HTTP 404.
+- Browser click automation remained unavailable because the in-app browser runtime exposed no browser instance; automated interaction, API, build, and deployed-bundle checks passed.
 
 ## 2026-08-12 — Shared Multi lunch room
 
