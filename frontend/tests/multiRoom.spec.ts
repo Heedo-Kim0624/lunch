@@ -74,6 +74,9 @@ describe('multi room presentation rules', () => {
     expect(multiApiUrl('https://lunch.example/api/v1/', '/foods')).toBe(
       'https://lunch.example/api/v1/foods',
     )
+    expect(multiApiUrl('  https://lunch.example/api/v1\r\n', '/foods')).toBe(
+      'https://lunch.example/api/v1/foods',
+    )
   })
 
   it('uses an exact catalog match or creates a room-scoped direct choice', () => {

@@ -15,8 +15,10 @@ from recommendations.services.multi_room import (
     draw_room,
     join_room,
     read_room,
+    require_participant,
     room_payload,
     search_foods,
+    search_room_custom_foods,
     submit_choices,
 )
 
@@ -39,22 +41,47 @@ class FoodSearchView(APIView):
     def get(self, request: Request) -> Response:
         serializer = FoodSearchSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
-        foods = search_foods(serializer.validated_data["q"])
-        return Response(
+        query = serializer.validated_data["q"]
+        room_code = serializer.validated_data.get("room")
+        custom_foods = []
+        if room_code:
+            try:
+                room = read_room(room_code)
+                require_participant(room, participant_token(request))
+            except MultiRoomDomainError as error:
+                return domain_error_response(error)
+            custom_foods = list(search_room_custom_foods(room, query))
+
+        options = [
             {
-                "foods": [
-                    {
-                        "id": food.id,
-                        "key": f"food:{food.id}",
-                        "name": food.canonical_name,
-                        "family": food.family,
-                        "cuisine": food.cuisine,
-                        "is_custom": False,
-                    }
-                    for food in foods
-                ]
+                "id": None,
+                "key": f"custom:{food.id}",
+                "name": food.name,
+                "family": "직접 입력",
+                "cuisine": "사용자 메뉴",
+                "is_custom": True,
             }
-        )
+            for food in custom_foods
+        ]
+        seen_names = {str(option["name"]).casefold() for option in options}
+        for food in search_foods(query):
+            if len(options) >= 30:
+                break
+            normalized_name = food.canonical_name.casefold()
+            if normalized_name in seen_names:
+                continue
+            seen_names.add(normalized_name)
+            options.append(
+                {
+                    "id": food.id,
+                    "key": f"food:{food.id}",
+                    "name": food.canonical_name,
+                    "family": food.family,
+                    "cuisine": food.cuisine,
+                    "is_custom": False,
+                }
+            )
+        return Response({"foods": options})
 
 
 class MultiRoomCreateView(APIView):

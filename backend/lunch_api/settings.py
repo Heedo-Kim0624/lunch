@@ -102,10 +102,17 @@ CORS_ALLOWED_ORIGINS = [
     ).split(",")
     if origin.strip()
 ]
+PROJECT_VERCEL_CORS_ORIGIN = (
+    r"^https://(?:lunch-web(?:-[a-z0-9]+)?|"
+    r"lunch-[a-z0-9]+-heedo-kim0624s-projects)\.vercel\.app$"
+)
 CORS_ALLOWED_ORIGIN_REGEXES = [
-    regex.strip()
-    for regex in os.getenv("CORS_ALLOWED_ORIGIN_REGEXES", "").split(",")
-    if regex.strip()
+    PROJECT_VERCEL_CORS_ORIGIN,
+    *[
+        regex.strip()
+        for regex in os.getenv("CORS_ALLOWED_ORIGIN_REGEXES", "").split(",")
+        if regex.strip()
+    ],
 ]
 CORS_ALLOW_HEADERS = (*default_headers, "x-multi-token")
 

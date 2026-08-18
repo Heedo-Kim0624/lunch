@@ -2,7 +2,17 @@
 
 ## Result
 
-State: **PASS** for local SQLite and the deployed Neon/Vercel Multi search and direct-entry flow.
+State: **PASS** locally for the CRLF-safe, room-aware search repair. Production promotion is pending.
+
+## 2026-08-18 Multi production search runtime repair
+
+- [x] Deployed page runtime config reproduced the trailing `\r\n` in `apiBase`.
+- [x] Vercel runtime logs showed repeated `GET /api/v1` HTTP 404 requests during the reported search attempts while direct `/api/v1/foods` checks returned HTTP 200.
+- [x] URL construction now trims surrounding whitespace and CRLF; the exact production value shape failed before the fix and passes afterward.
+- [x] Valid room participants can search current room custom choices; anonymous room searches return HTTP 403, selectors and votes are omitted, and removed choices disappear.
+- [x] Stable, owner alias, and project deployment-style Vercel web origins receive the exact CORS allow-origin header.
+- [x] Full verifier: 74 backend tests, 16 frontend tests, Ruff, ESLint, Django checks, migration drift, TypeScript, and Nuxt production build passed.
+- [ ] GitHub Actions, API/web deployment, live catalog and room-custom search, request-path verification, and disposable-room cleanup.
 
 ## 2026-08-18 Multi search and direct-entry local verification
 

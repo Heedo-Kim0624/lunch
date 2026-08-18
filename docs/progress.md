@@ -1,5 +1,13 @@
 # Progress
 
+## 2026-08-18 — Multi production search runtime repair
+
+- Traced the reported search failure to repeated production `GET /api/v1` 404s while the catalog endpoint itself remained healthy.
+- Confirmed the deployed Nuxt runtime config contained a trailing CRLF in `apiBase`; query serialization truncated the intended `/foods` path at that boundary.
+- Made the Multi URL helper trim surrounding whitespace and CRLF before joining paths and added an exact regression test for the deployed value shape.
+- Added token-gated room-aware search so current room custom choices appear beside catalog matches without exposing participant identity or vote counts; removed choices no longer appear.
+- Added project-scoped Vercel alias CORS coverage and passed the full local gate with 74 backend tests, 16 frontend tests, lint, type checking, migration drift checking, and the Nuxt production build.
+
 ## 2026-08-18 — Multi search recovery and direct menu entry
 
 - Reproduced a user-visible food-search failure and confirmed the catalog API itself still returned HTTP 200 with the production web CORS origin.

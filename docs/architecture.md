@@ -61,7 +61,7 @@ The `rules-v4` score is explainable and versioned: 45% personal attribute prefer
 ### Shared lunch rooms
 
 ```text
-GET  /api/v1/foods?q={query}
+GET  /api/v1/foods?q={query}&room={optional-room-code}
 POST /api/v1/multi/rooms
 POST /api/v1/multi/rooms/{code}/join
 GET  /api/v1/multi/rooms/{code}
@@ -71,7 +71,7 @@ POST /api/v1/multi/rooms/{code}/draw
 
 방 생성과 입장은 한 번만 표시되는 참가자 토큰을 반환한다. 이후 쓰기 요청은 `X-Multi-Token` 헤더를 사용하고 DB에는 SHA-256 해시만 저장한다. 방 코드는 엔트로피가 충분한 위치 식별자일 뿐 권한 비밀값은 아니다. 생성, 입장, 검색, 목록 저장과 추첨에는 각각 요청 제한을 적용한다.
 
-Multi 선택은 큐레이션된 `Food` 또는 방 범위 `MultiRoomCustomFood` 중 하나를 참조한다. 직접 입력 이름은 NFKC·공백·대소문자를 정규화하고 방 안에서 공유해 같은 입력이 같은 투표 키를 사용하게 하며, 추천 카탈로그에는 섞지 않는다. 프런트엔드는 공통 URL 함수로 API 경로를 결합하고 오래된 검색 응답을 무시하며, 검색 실패 중에도 직접 추가를 유지한다.
+Multi 선택은 큐레이션된 `Food` 또는 방 범위 `MultiRoomCustomFood` 중 하나를 참조한다. 직접 입력 이름은 NFKC·공백·대소문자를 정규화하고 방 안에서 공유해 같은 입력이 같은 투표 키를 사용하게 하며, 추천 카탈로그에는 섞지 않는다. 방 코드가 포함된 검색은 `X-Multi-Token`으로 참가자를 확인한 뒤 현재 선택에서 참조 중인 방 전용 메뉴 이름만 카탈로그 결과와 함께 반환하며 선택자와 표 수는 반환하지 않는다. 프런트엔드는 공통 URL 함수에서 런타임 API 주소의 공백·CRLF·끝 슬래시를 정리하고 경로를 결합하며, 오래된 검색 응답을 무시하고 검색 실패 중에도 직접 추가를 유지한다.
 
 방 조회는 참가자 닉네임, 방장·완료 상태, 선택 개수, 집계 최다 후보와 현재 추첨 결과를 반환하며 토큰은 직렬화하지 않는다. 첫 추첨 뒤에는 목록과 입장을 잠근다. 방장 추첨은 데이터베이스 트랜잭션과 행 잠금 안에서 완료 상태와 표 수를 다시 계산한다.
 

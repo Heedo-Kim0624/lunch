@@ -304,6 +304,77 @@ def test_food_search_returns_active_matches_only(
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    "origin",
+    [
+        "https://lunch-web-ten.vercel.app",
+        "https://lunch-web-heedo-kim0624s-projects.vercel.app",
+        "https://lunch-abc123-heedo-kim0624s-projects.vercel.app",
+    ],
+)
+def test_food_search_allows_project_scoped_vercel_origins(
+    api_client: APIClient,
+    multi_foods: list[Food],
+    origin: str,
+) -> None:
+    response = api_client.get(reverse("food-search"), {"q": "라면"}, HTTP_ORIGIN=origin)
+
+    assert response.status_code == 200
+    assert response.headers["Access-Control-Allow-Origin"] == origin
+
+
+@pytest.mark.django_db
+def test_participant_search_includes_existing_room_custom_choices(
+    api_client: APIClient,
+) -> None:
+    created = create_room(api_client)
+    code = created["room"]["code"]
+    guest = join_room(api_client, code, "민지")
+    submit_choice_items(
+        api_client,
+        code,
+        created["participant_token"],
+        [{"custom_name": "회사 앞 제육"}],
+    )
+
+    response = api_client.get(
+        reverse("food-search"),
+        {"q": "회사", "room": code},
+        HTTP_X_MULTI_TOKEN=guest["participant_token"],
+    )
+
+    assert response.status_code == 200
+    assert response.json()["foods"] == [
+        {
+            "id": None,
+            "key": f"custom:{MultiRoomCustomFood.objects.get(room__code=code).id}",
+            "name": "회사 앞 제육",
+            "family": "직접 입력",
+            "cuisine": "사용자 메뉴",
+            "is_custom": True,
+        }
+    ]
+
+    anonymous = api_client.get(reverse("food-search"), {"q": "회사", "room": code})
+    assert anonymous.status_code == 403
+    assert anonymous.json()["code"] == "invalid_participant_token"
+
+    submit_choice_items(
+        api_client,
+        code,
+        created["participant_token"],
+        [{"custom_name": "다른 메뉴"}],
+    )
+    removed = api_client.get(
+        reverse("food-search"),
+        {"q": "회사", "room": code},
+        HTTP_X_MULTI_TOKEN=guest["participant_token"],
+    )
+    assert removed.status_code == 200
+    assert removed.json()["foods"] == []
+
+
+@pytest.mark.django_db
 def test_equal_direct_menu_names_overlap_and_can_win(api_client: APIClient) -> None:
     created = create_room(api_client)
     code = created["room"]["code"]

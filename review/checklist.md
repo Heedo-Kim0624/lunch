@@ -8,6 +8,7 @@
 - [x] Each participant submits 1–12 distinct catalog or room-scoped direct-entry foods and adds one visible readiness reel.
 - [x] Search uses a stable API URL and stale-response guard; direct add remains available during empty results or request failures.
 - [x] Direct names are validated and normalized, exact catalog matches resolve to `Food`, and custom rows never pollute the curated catalog.
+- [x] Search trims CRLF from runtime API configuration and exposes current room custom names only to valid room participants without identity or vote metadata.
 - [x] The host lever requires two participants, everyone ready, and at least one food with two distinct votes.
 - [x] No-overlap rooms stay locked with explicit copy and an API `no_overlap` conflict.
 - [x] Unique top foods become final; tied top foods support non-repeating immediate rerolls.

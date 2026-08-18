@@ -13,6 +13,8 @@ import {
 
 const props = defineProps<{
   open: boolean
+  roomCode: string
+  participantToken: string | null
   initialChoices: MultiFoodSummary[]
   submitting: boolean
 }>()
@@ -49,7 +51,10 @@ async function searchFoods(): Promise<void> {
     const response = await $fetch<FoodSearchEnvelope>(
       multiApiUrl(config.public.apiBase, 'foods'),
       {
-        query: { q: query.value.trim() },
+        query: { q: query.value.trim(), room: props.roomCode },
+        headers: props.participantToken
+          ? { 'X-Multi-Token': props.participantToken }
+          : {},
         retry: 1,
       },
     )
