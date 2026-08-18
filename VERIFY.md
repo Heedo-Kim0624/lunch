@@ -2,7 +2,7 @@
 
 ## Result
 
-State: **PASS** for local SQLite and the deployed Neon/Vercel Multi-room baseline. The direct-entry production promotion is pending.
+State: **PASS** for local SQLite and the deployed Neon/Vercel Multi search and direct-entry flow.
 
 ## 2026-08-18 Multi search and direct-entry local verification
 
@@ -14,7 +14,13 @@ State: **PASS** for local SQLite and the deployed Neon/Vercel Multi-room baselin
 - [x] Invalid characters, duplicate direct names, and catalog/direct duplicates are rejected.
 - [x] Migration `0006_multiroom_leading_choice_keys_and_more` applied to local SQLite.
 - [x] Full verifier: 70 backend tests, 16 frontend tests, Ruff, ESLint, Django checks, migration drift, TypeScript, and Nuxt production build passed.
-- [ ] Neon migration, Vercel API/web deployment, live browser/API smoke, and disposable-room cleanup.
+- [x] PR #5 passed both GitHub Actions jobs and merged to `main` as `0c14577`.
+- [x] Neon migration `0006_multiroom_leading_choice_keys_and_more` applied successfully.
+- [x] API deployment `dpl_B86L3SDwtVA6FzwyAYDEjWVbuGfo` and web deployment `dpl_CcWUmGJaz1CHznU9D5gWMbjt1XbG` reached Ready on the existing production aliases.
+- [x] Live API smoke: two participants submitted whitespace variants of one direct menu, the normalized leader received two votes, and the host draw returned the custom winner with `id=null` and `is_custom=true`.
+- [x] Live catalog search for `라면` returned three results, and the deployed `/multi/TESTCODE` route returned HTTP 200 with the new direct-add and search/direct-input copy in its production bundles.
+- [x] The disposable smoke room and its two choices, two participants, and custom-food row were deleted; follow-up room lookup returned HTTP 404.
+- [ ] Live browser click/keyboard smoke; the in-app browser runtime reported no available browser instance.
 
 ## 2026-08-12 Multi-room local verification
 
